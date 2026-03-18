@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-function formatearPrecio(precio) {
+function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
 }
 
