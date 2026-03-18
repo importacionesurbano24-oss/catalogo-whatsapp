@@ -6,7 +6,7 @@ function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
 }
 
-function ProductoCard({ producto, onAgregar }) {
+function ProductoCard({ producto, onAgregar }: any) {
   const [colorSel, setColorSel] = useState('')
   const [tallaSel, setTallaSel] = useState('')
   const [agregado, setAgregado] = useState(false)
