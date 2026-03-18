@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 export default function SuperAdmin() {
   const [token, setToken] = useState('')
   const [adminInfo, setAdminInfo] = useState(null)
-  const [stats, setStats] = useState(null)
-  const [tiendas, setTiendas] = useState([])
+  const [stats, setStats] = useState<any>(null)
+  const [tiendas, setTiendas] = useState<any[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
 
@@ -61,7 +61,7 @@ export default function SuperAdmin() {
     }
   }
 
-  async function toggleTienda(id) {
+  async function toggleTienda(id: number) {
     const res = await fetch(`http://localhost:3000/api/superadmin/tiendas/${id}/toggle`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` }
@@ -71,7 +71,7 @@ export default function SuperAdmin() {
     }
   }
 
-  function formatearFecha(fecha) {
+  function formatearFecha(fecha: string) {
     return new Date(fecha).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })
   }
 
