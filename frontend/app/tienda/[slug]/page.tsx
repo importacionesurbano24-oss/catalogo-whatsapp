@@ -2,7 +2,11 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+export function generateStaticParams() {
+  return [{ slug: 'demo' }]
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL || ''
 
 function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })

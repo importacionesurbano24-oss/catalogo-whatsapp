@@ -21,8 +21,15 @@ app.use('/api/auth', authRoutes)
 app.use('/api/tienda', tiendaRoutes)
 app.use('/api/superadmin', superadminRoutes)
 
-app.get('/', (req, res) => {
-  res.json({ mensaje: 'Servidor funcionando' })
+const frontendOut = path.join(__dirname, '../frontend/out')
+app.use(express.static(frontendOut))
+
+app.get('/tienda/*', (req, res) => {
+  res.sendFile(path.join(frontendOut, 'tienda/demo/index.html'))
+})
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendOut, 'index.html'))
 })
 
 async function initTables() {
