@@ -1,13 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-const API = process.env.NEXT_PUBLIC_API_URL || ''
-
 export default function SuperAdmin() {
   const [token, setToken] = useState('')
   const [adminInfo, setAdminInfo] = useState(null)
-  const [stats, setStats] = useState(null)
-  const [tiendas, setTiendas] = useState([])
+  const [stats, setStats] = useState<any>(null)
+  const [tiendas, setTiendas] = useState<any[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
 
@@ -38,10 +36,10 @@ export default function SuperAdmin() {
   async function cargarDatos() {
     try {
       const [statsRes, tiendasRes] = await Promise.all([
-        fetch(`${API}/api/superadmin/estadisticas`, {
+        fetch('https://catalogo-whatsapp-production.up.railway.app/api/superadmin/estadisticas', {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch(`${API}/api/superadmin/tiendas`, {
+        fetch('https://catalogo-whatsapp-production.up.railway.app/api/superadmin/tiendas', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ])
@@ -63,8 +61,8 @@ export default function SuperAdmin() {
     }
   }
 
-  async function toggleTienda(id) {
-    const res = await fetch(`${API}/api/superadmin/tiendas/${id}/toggle`, {
+  async function toggleTienda(id: number) {
+    const res = await fetch(`https://catalogo-whatsapp-production.up.railway.app/api/superadmin/tiendas/${id}/toggle`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` }
     })
@@ -73,7 +71,7 @@ export default function SuperAdmin() {
     }
   }
 
-  function formatearFecha(fecha) {
+  function formatearFecha(fecha: string) {
     return new Date(fecha).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })
   }
 

@@ -1,9 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const API = process.env.NEXT_PUBLIC_API_URL || ''
-
-function ProductoCard({ producto, onAgregar }) {
+function ProductoCard({ producto, onAgregar }: { producto: any; onAgregar: any }) {
   const [colorSel, setColorSel] = useState('')
   const [tallaSel, setTallaSel] = useState('')
 
@@ -11,7 +9,7 @@ function ProductoCard({ producto, onAgregar }) {
     <div className="bg-gray-900 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 border border-gray-700">
       {producto.imagen ? (
         <img
-          src={`${API}${producto.imagen}`}
+          src={producto.imagen}
           alt={producto.nombre}
           className="w-full h-56 object-cover"
         />
@@ -27,7 +25,7 @@ function ProductoCard({ producto, onAgregar }) {
           <select value={colorSel} onChange={e => setColorSel(e.target.value)}
             className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg p-2 mt-3 text-sm">
             <option value="">🎨 Color</option>
-            {producto.colores.split(',').map((color, i) => (
+            {producto.colores.split(',').map((color: string, i: number) => (
               <option key={i} value={color.trim()}>{color.trim()}</option>
             ))}
           </select>
@@ -36,7 +34,7 @@ function ProductoCard({ producto, onAgregar }) {
           <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
             className="w-full bg-gray-800 border border-gray-600 text-white rounded-lg p-2 mt-2 text-sm">
             <option value="">📏 Talla</option>
-            {producto.tallas.split(',').map((talla, i) => (
+            {producto.tallas.split(',').map((talla: string, i: number) => (
               <option key={i} value={talla.trim()}>{talla.trim()}</option>
             ))}
           </select>
@@ -54,17 +52,18 @@ function ProductoCard({ producto, onAgregar }) {
 }
 
 export default function Home() {
-  const [productos, setProductos] = useState([])
-  const [carrito, setCarrito] = useState([])
+  const [productos, setProductos] = useState<any[]>([])
+  const [carrito, setCarrito] = useState<any[]>([])
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
 
   useEffect(() => {
-    fetch(`${API}/api/productos`)
+    fetch('https://catalogo-whatsapp-production.up.railway.app/api/productos')
       .then(res => res.json())
-      .then(data => setProductos(data))
+      .then(data => setProductos(Array.isArray(data) ? data : []))
+      .catch(() => setProductos([]))
   }, [])
 
-  function agregarAlCarrito(producto, color, talla) {
+  function agregarAlCarrito(producto: any, color: string, talla: string) {
     setCarrito([...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }])
   }
 

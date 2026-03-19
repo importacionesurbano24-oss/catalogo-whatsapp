@@ -16,7 +16,8 @@ router.get('/:slug', async (req, res) => {
       'SELECT * FROM productos WHERE admin_id = $1',
       [tienda.rows[0].id]
     )
-    res.json({ tienda: tienda.rows[0], productos: productos.rows })
+    const { password, ...tiendaSegura } = tienda.rows[0]
+    res.json({ tienda: tiendaSegura, productos: productos.rows })
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener tienda' })
   }

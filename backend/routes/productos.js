@@ -8,12 +8,12 @@ const verificarToken = require('../middleware/verificarToken')
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
 const upload = multer({ storage: multer.memoryStorage() })
 
-// GET todos los productos
+// GET todos los productos (para el catálogo público — no necesita token)
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM productos')
@@ -37,34 +37,29 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
   }
 })
 
-// POST crear producto
+// POST crear producto (protegido con token)
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
     const { nombre, descripcion, precio, colores, tallas } = req.body
     const admin_id = req.admin.id
-    let imagen = null
+    let imagenUrl = null
 
     if (req.file) {
       const resultado = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: 'catalogo-whatsapp' },
-          (error, result) => {
-            if (error) reject(error)
-            else resolve(result)
-          }
-        )
-        stream.end(req.file.buffer)
+        cloudinary.uploader.upload_stream({ folder: 'catalogo-whatsapp' }, (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }).end(req.file.buffer)
       })
-      imagen = resultado.secure_url
+      imagenUrl = resultado.secure_url
     }
 
     const result = await pool.query(
       'INSERT INTO productos (nombre, descripcion, precio, imagen, colores, tallas, admin_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [nombre, descripcion, precio, imagen, colores, tallas, admin_id]
+      [nombre, descripcion, precio, imagenUrl, colores, tallas, admin_id]
     )
     res.json(result.rows[0])
   } catch (error) {
-    console.error('Error al crear producto:', error.message)
     res.status(500).json({ error: 'Error al crear producto' })
   }
 })

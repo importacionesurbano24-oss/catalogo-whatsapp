@@ -2,12 +2,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 
-export function generateStaticParams() {
-  return [{ slug: 'demo' }]
-}
-
-const API = process.env.NEXT_PUBLIC_API_URL || ''
-
 function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
 }
@@ -28,7 +22,7 @@ function ProductoCard({ producto, onAgregar }: any) {
       <div className="relative w-full aspect-square bg-gray-800 overflow-hidden">
         {producto.imagen ? (
           <img
-            src={`${API}${producto.imagen}`}
+            src={producto.imagen}
             alt={producto.nombre}
             className="w-full h-full object-contain p-2"
           />
@@ -48,7 +42,7 @@ function ProductoCard({ producto, onAgregar }: any) {
             <select value={colorSel} onChange={e => setColorSel(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
               <option value="">🎨 Elegir color</option>
-              {producto.colores.split(',').map((color, i) => (
+              {producto.colores.split(',').map((color: string, i: number) => (
                 <option key={i} value={color.trim()}>{color.trim()}</option>
               ))}
             </select>
@@ -57,7 +51,7 @@ function ProductoCard({ producto, onAgregar }: any) {
             <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
               <option value="">📏 Elegir talla</option>
-              {producto.tallas.split(',').map((talla, i) => (
+              {producto.tallas.split(',').map((talla: string, i: number) => (
                 <option key={i} value={talla.trim()}>{talla.trim()}</option>
               ))}
             </select>
@@ -84,13 +78,13 @@ function ProductoCard({ producto, onAgregar }: any) {
 export default function TiendaPage() {
   const params = useParams()
   const slug = params.slug
-  const [tienda, setTienda] = useState(null)
-  const [productos, setProductos] = useState([])
-  const [carrito, setCarrito] = useState([])
+  const [tienda, setTienda] = useState<any>(null)
+  const [productos, setProductos] = useState<any[]>([])
+  const [carrito, setCarrito] = useState<any[]>([])
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
 
   useEffect(() => {
-    fetch(`${API}/api/tienda/${slug}`)
+    fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
       .then(res => res.json())
       .then(data => {
         setTienda(data.tienda)
@@ -98,11 +92,11 @@ export default function TiendaPage() {
       })
   }, [slug])
 
-  function agregarAlCarrito(producto, color, talla) {
+  function agregarAlCarrito(producto: any, color: string, talla: string) {
     setCarrito([...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }])
   }
 
-  function eliminarDelCarrito(index) {
+  function eliminarDelCarrito(index: number) {
     setCarrito(carrito.filter((_, i) => i !== index))
   }
 
