@@ -36,10 +36,10 @@ export default function SuperAdmin() {
   async function cargarDatos() {
     try {
       const [statsRes, tiendasRes] = await Promise.all([
-        fetch('http://localhost:3000/api/superadmin/estadisticas', {
+        fetch('https://catalogo-whatsapp-production.up.railway.app/api/superadmin/estadisticas', {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('http://localhost:3000/api/superadmin/tiendas', {
+        fetch('https://catalogo-whatsapp-production.up.railway.app/api/superadmin/tiendas', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ])
@@ -62,7 +62,7 @@ export default function SuperAdmin() {
   }
 
   async function toggleTienda(id: number) {
-    const res = await fetch(`http://localhost:3000/api/superadmin/tiendas/${id}/toggle`, {
+    const res = await fetch(`https://catalogo-whatsapp-production.up.railway.app/api/superadmin/tiendas/${id}/toggle`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` }
     })

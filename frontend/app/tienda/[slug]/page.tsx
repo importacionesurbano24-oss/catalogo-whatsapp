@@ -22,7 +22,7 @@ function ProductoCard({ producto, onAgregar }: any) {
       <div className="relative w-full aspect-square bg-gray-800 overflow-hidden">
         {producto.imagen ? (
           <img
-            src={`http://localhost:3001${producto.imagen}`}
+            src={`https://catalogo-whatsapp-production.up.railway.app${producto.imagen}`}
             alt={producto.nombre}
             className="w-full h-full object-contain p-2"
           />
@@ -84,7 +84,7 @@ export default function TiendaPage() {
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/tienda/${slug}`)
+    fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
       .then(res => res.json())
       .then(data => {
         setTienda(data.tienda)
