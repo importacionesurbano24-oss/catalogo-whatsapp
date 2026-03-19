@@ -6,7 +6,7 @@ router.get('/:slug', async (req, res) => {
   try {
     const { slug } = req.params
     const tienda = await pool.query(
-      "SELECT * FROM admins WHERE LOWER(REPLACE(nombre, ' ', '-')) = $1",
+      "SELECT id, nombre, email, plan, activo, whatsapp, created_at FROM admins WHERE LOWER(REPLACE(nombre, ' ', '-')) = $1",
       [slug]
     )
     if (tienda.rows.length === 0) {

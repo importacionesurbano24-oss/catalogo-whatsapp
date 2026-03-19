@@ -1,6 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+
 function ProductoCard({ producto, onAgregar }) {
   const [colorSel, setColorSel] = useState('')
   const [tallaSel, setTallaSel] = useState('')
@@ -9,7 +11,7 @@ function ProductoCard({ producto, onAgregar }) {
     <div className="bg-gray-900 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 border border-gray-700">
       {producto.imagen ? (
         <img
-          src={`http://localhost:3001${producto.imagen}`}
+          src={`${API}${producto.imagen}`}
           alt={producto.nombre}
           className="w-full h-56 object-cover"
         />
@@ -57,7 +59,7 @@ export default function Home() {
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/productos')
+    fetch(`${API}/api/productos`)
       .then(res => res.json())
       .then(data => setProductos(data))
   }, [])

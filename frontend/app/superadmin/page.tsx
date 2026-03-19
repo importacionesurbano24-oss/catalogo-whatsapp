@@ -1,6 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+
 export default function SuperAdmin() {
   const [token, setToken] = useState('')
   const [adminInfo, setAdminInfo] = useState(null)
@@ -36,10 +38,10 @@ export default function SuperAdmin() {
   async function cargarDatos() {
     try {
       const [statsRes, tiendasRes] = await Promise.all([
-        fetch('http://localhost:3000/api/superadmin/estadisticas', {
+        fetch(`${API}/api/superadmin/estadisticas`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('http://localhost:3000/api/superadmin/tiendas', {
+        fetch(`${API}/api/superadmin/tiendas`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ])
@@ -62,7 +64,7 @@ export default function SuperAdmin() {
   }
 
   async function toggleTienda(id) {
-    const res = await fetch(`http://localhost:3000/api/superadmin/tiendas/${id}/toggle`, {
+    const res = await fetch(`${API}/api/superadmin/tiendas/${id}/toggle`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` }
     })

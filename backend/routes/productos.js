@@ -7,7 +7,7 @@ const verificarToken = require('../middleware/verificarToken')
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, '../frontend/public/imagenes/')
+    cb(null, path.join(__dirname, '../public/imagenes/'))
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname))

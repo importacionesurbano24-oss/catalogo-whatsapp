@@ -15,6 +15,7 @@ const PORT = Number(process.env.PORT) || 3000
 
 app.use(cors())
 app.use(express.json())
+app.use('/imagenes', express.static(path.join(__dirname, 'public/imagenes')))
 app.use('/api/productos', productosRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/tienda', tiendaRoutes)
