@@ -3,11 +3,17 @@ const router = express.Router()
 const pool = require('../db')
 const multer = require('multer')
 const path = require('path')
+const fs = require('fs')
 const verificarToken = require('../middleware/verificarToken')
+
+const imagenesDir = path.join(__dirname, '../public/imagenes/')
+if (!fs.existsSync(imagenesDir)) {
+  fs.mkdirSync(imagenesDir, { recursive: true })
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../public/imagenes/'))
+    cb(null, imagenesDir)
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + path.extname(file.originalname))
