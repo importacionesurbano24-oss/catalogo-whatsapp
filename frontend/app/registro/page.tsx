@@ -1,8 +1,10 @@
 'use client'
 import { useState } from 'react'
 
+const API = process.env.NEXT_PUBLIC_API_URL || ''
+
 export default function Registro() {
-  const [form, setForm] = useState({ nombre: '', email: '', password: '' })
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', whatsapp: '' })
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -14,7 +16,7 @@ export default function Registro() {
     setError('')
 
     try {
-      const res = await fetch('https://catalogo-whatsapp-production.up.railway.app/api/auth/registro', {
+      const res = await fetch(`${API}/api/auth/registro`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
@@ -24,7 +26,7 @@ export default function Registro() {
         setError(data.error || 'Error al registrarse')
       } else {
         setMensaje('¡Cuenta creada! Ya puedes iniciar sesión en /admin')
-        setForm({ nombre: '', email: '', password: '' })
+        setForm({ nombre: '', email: '', password: '', whatsapp: '' })
       }
     } catch {
       setError('No se pudo conectar al servidor')
@@ -42,46 +44,35 @@ export default function Registro() {
         <form onSubmit={handleSubmit} className="bg-gray-950 border border-gray-800 rounded-2xl p-6 space-y-4">
           <div>
             <label className="text-gray-400 text-sm">Nombre de tu tienda</label>
-            <input
-              type="text"
-              value={form.nombre}
-              onChange={e => setForm({ ...form, nombre: e.target.value })}
-              required
+            <input type="text" value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} required
               className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
-              placeholder="Ej: Importaciones Urbano"
-            />
+              placeholder="Ej: Importaciones Urbano" />
           </div>
           <div>
             <label className="text-gray-400 text-sm">Email</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
-              required
+            <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required
               className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
-              placeholder="tucorreo@email.com"
-            />
+              placeholder="tucorreo@email.com" />
           </div>
           <div>
             <label className="text-gray-400 text-sm">Contraseña</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-              required
+            <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required
               className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
-              placeholder="Mínimo 6 caracteres"
-            />
+              placeholder="Mínimo 6 caracteres" />
+          </div>
+          <div>
+            <label className="text-gray-400 text-sm">Número de WhatsApp</label>
+            <input type="tel" value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} required
+              className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
+              placeholder="Ej: 573001234567" />
+            <p className="text-gray-600 text-xs mt-1">Con código de país, sin espacios ni +</p>
           </div>
 
           {error && <p className="text-red-400 text-sm">{error}</p>}
           {mensaje && <p className="text-green-400 text-sm">{mensaje}</p>}
 
-          <button
-            type="submit"
-            disabled={cargando}
-            className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50"
-          >
+          <button type="submit" disabled={cargando}
+            className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
             {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
           </button>
 

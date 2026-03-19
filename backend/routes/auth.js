@@ -3,30 +3,55 @@ const router = express.Router()
 const pool = require('../db')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const verificarToken = require('../middleware/verificarToken')
 
 // Registro
 router.post('/registro', async (req, res) => {
   try {
-    const { nombre, email, password } = req.body
-    
-    // Verificar si el email ya existe
+    const { nombre, email, password, whatsapp } = req.body
+
     const existe = await pool.query('SELECT * FROM admins WHERE email = $1', [email])
     if (existe.rows.length > 0) {
       return res.status(400).json({ error: 'El email ya está registrado' })
     }
 
-    // Encriptar contraseña
     const passwordEncriptado = await bcrypt.hash(password, 10)
 
-    // Crear admin
     const result = await pool.query(
-      'INSERT INTO admins (nombre, email, password, rol, plan) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [nombre, email, passwordEncriptado, 'admin', 'gratis']
+      'INSERT INTO admins (nombre, email, password, whatsapp, rol, plan) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [nombre, email, passwordEncriptado, whatsapp || null, 'admin', 'gratis']
     )
 
     res.json({ mensaje: 'Cuenta creada exitosamente', admin: result.rows[0] })
   } catch (error) {
     res.status(500).json({ error: 'Error al registrar' })
+  }
+})
+
+// GET perfil del admin
+router.get('/perfil', verificarToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, nombre, email, whatsapp, plan, rol FROM admins WHERE id = $1',
+      [req.admin.id]
+    )
+    res.json(result.rows[0])
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener perfil' })
+  }
+})
+
+// PUT actualizar perfil
+router.put('/perfil', verificarToken, async (req, res) => {
+  try {
+    const { nombre, whatsapp } = req.body
+    const result = await pool.query(
+      'UPDATE admins SET nombre = $1, whatsapp = $2 WHERE id = $3 RETURNING id, nombre, email, whatsapp, plan, rol',
+      [nombre, whatsapp, req.admin.id]
+    )
+    res.json(result.rows[0])
+  } catch (error) {
+    res.status(500).json({ error: 'Error al actualizar perfil' })
   }
 })
 
