@@ -22,7 +22,7 @@ function ProductoCard({ producto, onAgregar }: any) {
       <div className="relative w-full aspect-square bg-gray-800 overflow-hidden">
         {producto.imagen ? (
           <img
-            src={`https://catalogo-whatsapp-production.up.railway.app${producto.imagen}`}
+            src={producto.imagen}
             alt={producto.nombre}
             className="w-full h-full object-contain p-2"
           />

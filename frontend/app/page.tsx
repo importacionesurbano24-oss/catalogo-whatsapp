@@ -9,7 +9,7 @@ function ProductoCard({ producto, onAgregar }: { producto: any; onAgregar: any }
     <div className="bg-gray-900 rounded-2xl overflow-hidden hover:scale-105 transition-transform duration-300 border border-gray-700">
       {producto.imagen ? (
         <img
-          src={`https://catalogo-whatsapp-production.up.railway.app${producto.imagen}`}
+          src={producto.imagen}
           alt={producto.nombre}
           className="w-full h-56 object-cover"
         />
@@ -59,7 +59,8 @@ export default function Home() {
   useEffect(() => {
     fetch('https://catalogo-whatsapp-production.up.railway.app/api/productos')
       .then(res => res.json())
-      .then(data => setProductos(data))
+      .then(data => setProductos(Array.isArray(data) ? data : []))
+      .catch(() => setProductos([]))
   }, [])
 
   function agregarAlCarrito(producto: any, color: string, talla: string) {
