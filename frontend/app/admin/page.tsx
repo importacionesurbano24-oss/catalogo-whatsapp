@@ -47,7 +47,7 @@ function ProductoCard({ producto, onAgregar }: any) {
             <select value={colorSel} onChange={e => setColorSel(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
               <option value="">🎨 Elegir color</option>
-              {producto.colores.split(',').map((color, i) => (
+              {producto.colores.split(',').map((color: string, i: number) => (
                 <option key={i} value={color.trim()}>{color.trim()}</option>
               ))}
             </select>
@@ -56,7 +56,7 @@ function ProductoCard({ producto, onAgregar }: any) {
             <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
               className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
               <option value="">📏 Elegir talla</option>
-              {producto.tallas.split(',').map((talla, i) => (
+              {producto.tallas.split(',').map((talla: string, i: number) => (
                 <option key={i} value={talla.trim()}>{talla.trim()}</option>
               ))}
             </select>
@@ -92,11 +92,11 @@ export default function Home() {
       .then(data => setProductos(data))
   }, [])
 
-  function agregarAlCarrito(producto, color, talla) {
+  function agregarAlCarrito(producto: any, color: any, talla: any) {
     setCarrito([...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }])
   }
 
-  function eliminarDelCarrito(index) {
+  function eliminarDelCarrito(index: number) {
     setCarrito(carrito.filter((_, i) => i !== index))
   }
 
