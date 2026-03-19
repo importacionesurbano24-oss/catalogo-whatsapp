@@ -1,190 +1,188 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-function formatearPrecio(precio: any) {
-  return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
-}
+const API = 'https://catalogo-whatsapp-production.up.railway.app'
 
-function ProductoCard({ producto, onAgregar }: any) {
-  const [colorSel, setColorSel] = useState('')
-  const [tallaSel, setTallaSel] = useState('')
-  const [agregado, setAgregado] = useState(false)
-
-  function handleAgregar() {
-    onAgregar(producto, colorSel, tallaSel)
-    setAgregado(true)
-    setTimeout(() => setAgregado(false), 1500)
-  }
-
-  return (
-    <div className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 flex flex-col">
-      {/* IMAGEN */}
-      <div className="relative w-full aspect-square bg-gray-800 overflow-hidden">
-        {producto.imagen ? (
-          <img
-            src={`https://catalogo-whatsapp-production.up.railway.app${producto.imagen}`}
-            alt={producto.nombre}
-            className="w-full h-full object-contain p-2"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-gray-600 text-6xl">📦</span>
-          </div>
-        )}
-      </div>
-
-      {/* INFO */}
-      <div className="p-4 flex flex-col flex-1">
-        <h2 className="text-white text-base font-semibold leading-tight">{producto.nombre}</h2>
-        {producto.descripcion && (
-          <p className="text-gray-500 text-sm mt-1 line-clamp-2">{producto.descripcion}</p>
-        )}
-
-        <div className="mt-3 space-y-2">
-          {producto.colores && producto.colores.trim() !== '' && (
-            <select value={colorSel} onChange={e => setColorSel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
-              <option value="">🎨 Elegir color</option>
-              {producto.colores.split(',').map((color: string, i: number) => (
-                <option key={i} value={color.trim()}>{color.trim()}</option>
-              ))}
-            </select>
-          )}
-          {producto.tallas && producto.tallas.trim() !== '' && (
-            <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
-              <option value="">📏 Elegir talla</option>
-              {producto.tallas.split(',').map((talla: string, i: number) => (
-                <option key={i} value={talla.trim()}>{talla.trim()}</option>
-              ))}
-            </select>
-          )}
-        </div>
-
-        <div className="mt-auto pt-4">
-          <p className="text-white font-bold text-xl">{formatearPrecio(producto.precio)}</p>
-          <button
-            onClick={handleAgregar}
-            className={`mt-2 w-full font-bold py-2.5 rounded-xl transition-all duration-300 text-sm ${
-              agregado
-                ? 'bg-green-500 text-white'
-                : 'bg-white hover:bg-gray-200 text-black'
-            }`}
-          >
-            {agregado ? '✅ Agregado!' : '🛒 Agregar al carrito'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function Home() {
+export default function Admin() {
+  const [token, setToken] = useState<string | null>(null)
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' })
+  const [loginError, setLoginError] = useState('')
   const [productos, setProductos] = useState<any[]>([])
-  const [carrito, setCarrito] = useState<any[]>([])
-  const [mostrarCarrito, setMostrarCarrito] = useState(false)
+  const [form, setForm] = useState({ nombre: '', descripcion: '', precio: '', colores: '', tallas: '' })
+  const [imagen, setImagen] = useState<File | null>(null)
+  const [mensaje, setMensaje] = useState('')
+  const [cargando, setCargando] = useState(false)
 
   useEffect(() => {
-    fetch('https://catalogo-whatsapp-production.up.railway.app/api/productos')
-      .then(res => res.json())
-      .then(data => setProductos(data))
+    const t = localStorage.getItem('token')
+    if (t) {
+      setToken(t)
+      cargarProductos(t)
+    }
   }, [])
 
-  function agregarAlCarrito(producto: any, color: string, talla: string) {
-    setCarrito([...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }])
+  async function cargarProductos(t: string) {
+    const res = await fetch(`${API}/api/productos/mis-productos`, {
+      headers: { Authorization: `Bearer ${t}` }
+    })
+    const data = await res.json()
+    setProductos(Array.isArray(data) ? data : [])
   }
 
-  function eliminarDelCarrito(index: number) {
-    setCarrito(carrito.filter((_, i) => i !== index))
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setLoginError('')
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(loginForm)
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      setLoginError(data.error || 'Error al iniciar sesión')
+    } else {
+      localStorage.setItem('token', data.token)
+      setToken(data.token)
+      cargarProductos(data.token)
+    }
   }
 
-  function totalCarrito() {
-    return carrito.reduce((sum, p) => sum + Number(p.precio), 0)
+  function handleLogout() {
+    localStorage.removeItem('token')
+    setToken(null)
+    setProductos([])
   }
 
-  function comprarWhatsApp() {
-    const numero = '573028663986'
-    const items = carrito.map(p =>
-      `• ${p.nombre} | Color: ${p.colorSeleccionado || 'N/A'} | Talla: ${p.tallaSeleccionada || 'N/A'} | ${formatearPrecio(p.precio)}`
-    ).join('\n')
-    const total = formatearPrecio(totalCarrito())
-    const mensaje = `¡Hola! Quiero comprar:\n\n${items}\n\n💰 Total: ${total}`
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`
-    window.open(url, '_blank')
+  async function handleCrearProducto(e: React.FormEvent) {
+    e.preventDefault()
+    if (!token) return
+    setCargando(true)
+    setMensaje('')
+
+    const formData = new FormData()
+    formData.append('nombre', form.nombre)
+    formData.append('descripcion', form.descripcion)
+    formData.append('precio', form.precio)
+    formData.append('colores', form.colores)
+    formData.append('tallas', form.tallas)
+    if (imagen) formData.append('imagen', imagen)
+
+    const res = await fetch(`${API}/api/productos`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData
+    })
+    const data = await res.json()
+    if (res.ok) {
+      setMensaje('Producto creado!')
+      setForm({ nombre: '', descripcion: '', precio: '', colores: '', tallas: '' })
+      setImagen(null)
+      cargarProductos(token)
+    } else {
+      setMensaje(data.error || 'Error al crear producto')
+    }
+    setCargando(false)
   }
 
-  return (
-    <main className="min-h-screen bg-black">
-      {/* NAVBAR */}
-      <nav className="bg-gray-950 border-b border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div>
-          <h1 className="text-white text-lg font-bold tracking-wide">IMPORTACIONES URBANO</h1>
-          <p className="text-gray-500 text-xs">De todo un poco</p>
+  async function handleEliminar(id: number) {
+    if (!token) return
+    await fetch(`${API}/api/productos/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    cargarProductos(token)
+  }
+
+  // LOGIN
+  if (!token) {
+    return (
+      <main className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <h1 className="text-white text-2xl font-bold text-center mb-2">Panel Admin</h1>
+          <p className="text-gray-500 text-center text-sm mb-8">Inicia sesión para gestionar tus productos</p>
+          <form onSubmit={handleLogin} className="bg-gray-950 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div>
+              <label className="text-gray-400 text-sm">Email</label>
+              <input type="email" value={loginForm.email} onChange={e => setLoginForm({ ...loginForm, email: e.target.value })} required
+                className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
+                placeholder="tucorreo@email.com" />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm">Contraseña</label>
+              <input type="password" value={loginForm.password} onChange={e => setLoginForm({ ...loginForm, password: e.target.value })} required
+                className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
+                placeholder="Tu contraseña" />
+            </div>
+            {loginError && <p className="text-red-400 text-sm">{loginError}</p>}
+            <button type="submit" className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">
+              Iniciar sesión
+            </button>
+            <p className="text-center text-gray-600 text-sm">
+              ¿No tienes cuenta? <a href="/registro" className="text-white underline">Regístrate</a>
+            </p>
+          </form>
         </div>
-        <button
-          onClick={() => setMostrarCarrito(!mostrarCarrito)}
-          className="relative bg-white text-black font-bold px-4 py-2 rounded-xl flex items-center gap-2 text-sm hover:bg-gray-200 transition"
-        >
-          🛒 Carrito
-          {carrito.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-              {carrito.length}
-            </span>
-          )}
-        </button>
-      </nav>
+      </main>
+    )
+  }
 
-      {/* CARRITO DESPLEGABLE */}
-      {mostrarCarrito && (
-        <div className="bg-gray-950 border-b border-gray-800 px-6 py-5">
-          {carrito.length === 0 ? (
-            <p className="text-gray-500 text-sm">Tu carrito está vacío</p>
-          ) : (
-            <>
-              <h2 className="text-white font-bold text-lg mb-3">Tu pedido ({carrito.length})</h2>
-              <div className="space-y-2 mb-4">
-                {carrito.map((p, i) => (
-                  <div key={i} className="flex justify-between items-center bg-gray-900 rounded-lg px-4 py-2 border border-gray-800">
-                    <div>
-                      <p className="text-white text-sm font-medium">{p.nombre}</p>
-                      <p className="text-gray-500 text-xs">
-                        {p.colorSeleccionado && `Color: ${p.colorSeleccionado}`}
-                        {p.colorSeleccionado && p.tallaSeleccionada && ' | '}
-                        {p.tallaSeleccionada && `Talla: ${p.tallaSeleccionada}`}
-                        {' — '}{formatearPrecio(p.precio)}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => eliminarDelCarrito(i)}
-                      className="text-red-400 hover:text-red-300 text-sm ml-3"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between items-center">
-                <p className="text-white font-bold text-lg">Total: {formatearPrecio(totalCarrito())}</p>
-                <button
-                  onClick={comprarWhatsApp}
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2.5 rounded-xl transition flex items-center gap-2 text-sm"
-                >
-                  💬 Enviar pedido por WhatsApp
+  // PANEL
+  return (
+    <main className="min-h-screen bg-black px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-white text-2xl font-bold">Panel Admin</h1>
+          <button onClick={handleLogout} className="text-gray-400 hover:text-white text-sm border border-gray-700 px-4 py-2 rounded-lg transition">
+            Cerrar sesión
+          </button>
+        </div>
+
+        {/* FORM NUEVO PRODUCTO */}
+        <div className="bg-gray-950 border border-gray-800 rounded-2xl p-6 mb-8">
+          <h2 className="text-white font-bold text-lg mb-4">Agregar producto</h2>
+          <form onSubmit={handleCrearProducto} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <input value={form.nombre} onChange={e => setForm({ ...form, nombre: e.target.value })} required
+                placeholder="Nombre" className="bg-gray-900 border border-gray-700 text-white rounded-lg p-3 text-sm focus:outline-none" />
+              <input value={form.precio} onChange={e => setForm({ ...form, precio: e.target.value })} required type="number"
+                placeholder="Precio" className="bg-gray-900 border border-gray-700 text-white rounded-lg p-3 text-sm focus:outline-none" />
+            </div>
+            <textarea value={form.descripcion} onChange={e => setForm({ ...form, descripcion: e.target.value })}
+              placeholder="Descripción (opcional)" rows={2}
+              className="w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 text-sm focus:outline-none" />
+            <div className="grid grid-cols-2 gap-3">
+              <input value={form.colores} onChange={e => setForm({ ...form, colores: e.target.value })}
+                placeholder="Colores (ej: rojo, azul)" className="bg-gray-900 border border-gray-700 text-white rounded-lg p-3 text-sm focus:outline-none" />
+              <input value={form.tallas} onChange={e => setForm({ ...form, tallas: e.target.value })}
+                placeholder="Tallas (ej: S, M, L)" className="bg-gray-900 border border-gray-700 text-white rounded-lg p-3 text-sm focus:outline-none" />
+            </div>
+            <input type="file" accept="image/*" onChange={e => setImagen(e.target.files?.[0] || null)}
+              className="w-full text-gray-400 text-sm" />
+            {mensaje && <p className="text-green-400 text-sm">{mensaje}</p>}
+            <button type="submit" disabled={cargando}
+              className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
+              {cargando ? 'Guardando...' : 'Agregar producto'}
+            </button>
+          </form>
+        </div>
+
+        {/* LISTA PRODUCTOS */}
+        <h2 className="text-white font-bold text-lg mb-4">Mis productos ({productos.length})</h2>
+        {productos.length === 0 ? (
+          <p className="text-gray-500 text-center py-10">No tienes productos aún</p>
+        ) : (
+          <div className="space-y-3">
+            {productos.map(p => (
+              <div key={p.id} className="bg-gray-950 border border-gray-800 rounded-xl p-4 flex justify-between items-center">
+                <div>
+                  <p className="text-white font-medium">{p.nombre}</p>
+                  <p className="text-gray-500 text-sm">${Number(p.precio).toLocaleString('es-CO')}</p>
+                </div>
+                <button onClick={() => handleEliminar(p.id)}
+                  className="text-red-400 hover:text-red-300 text-sm border border-red-900 px-3 py-1.5 rounded-lg transition">
+                  Eliminar
                 </button>
               </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* CATALOGO */}
-      <div className="px-6 py-8">
-        {productos.length === 0 ? (
-          <p className="text-gray-500 text-center py-20">Cargando productos...</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {productos.map(producto => (
-              <ProductoCard key={producto.id} producto={producto} onAgregar={agregarAlCarrito} />
             ))}
           </div>
         )}
