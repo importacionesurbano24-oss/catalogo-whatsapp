@@ -87,9 +87,14 @@ export default function TiendaPage() {
     fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
       .then(res => res.json())
       .then(data => {
-        setTienda(data.tienda)
-        setProductos(data.productos)
+        if (data.tienda) {
+          setTienda(data.tienda)
+          setProductos(data.productos || [])
+        } else {
+          setTienda({ error: true })
+        }
       })
+      .catch(() => setTienda({ error: true }))
   }, [slug])
 
   function agregarAlCarrito(producto: any, color: string, talla: string) {
@@ -116,6 +121,7 @@ export default function TiendaPage() {
   }
 
   if (!tienda) return <div className="min-h-screen bg-black flex items-center justify-center text-white text-lg">Cargando tienda...</div>
+  if (tienda.error) return <div className="min-h-screen bg-black flex items-center justify-center text-white text-lg">Tienda no encontrada</div>
 
   return (
     <main className="min-h-screen bg-black">
