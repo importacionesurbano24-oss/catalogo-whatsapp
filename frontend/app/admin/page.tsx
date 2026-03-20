@@ -235,7 +235,8 @@ export default function AdminPage() {
             className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
             ⚙️ Mi tienda
           </button>
-          <a href={`/tienda/${adminInfo?.nombre?.toLowerCase().replace(/ /g, '-') || ''}`} target="_blank"
+          <a href={`/tienda/${config.nombre?.toLowerCase().replace(/ /g, '-') || ''}`}
+
             className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
             👁️ Ver catálogo
           </a>
