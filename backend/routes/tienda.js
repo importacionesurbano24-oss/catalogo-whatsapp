@@ -13,27 +13,6 @@ cloudinary.config({
 
 const upload = multer({ storage: multer.memoryStorage() })
 
-router.get('/:slug', async (req, res) => {
-  try {
-    const { slug } = req.params
-    const tienda = await pool.query(
-      "SELECT * FROM admins WHERE LOWER(REPLACE(nombre, ' ', '-')) = $1",
-      [slug]
-    )
-    if (tienda.rows.length === 0) {
-      return res.status(404).json({ error: 'Tienda no encontrada' })
-    }
-    const productos = await pool.query(
-      'SELECT * FROM productos WHERE admin_id = $1',
-      [tienda.rows[0].id]
-    )
-    const { password, ...tiendaSegura } = tienda.rows[0]
-    res.json({ tienda: tiendaSegura, productos: productos.rows })
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener tienda' })
-  }
-})
-
 // PUT actualizar configuracion de la tienda
 router.put('/configuracion', verificarToken, upload.single('logo'), async (req, res) => {
   try {
@@ -83,6 +62,28 @@ router.get('/configuracion', verificarToken, async (req, res) => {
     res.json(result.rows[0])
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener configuración' })
+  }
+})
+
+// GET tienda pública por slug
+router.get('/:slug', async (req, res) => {
+  try {
+    const { slug } = req.params
+    const tienda = await pool.query(
+      "SELECT * FROM admins WHERE LOWER(REPLACE(nombre, ' ', '-')) = $1",
+      [slug]
+    )
+    if (tienda.rows.length === 0) {
+      return res.status(404).json({ error: 'Tienda no encontrada' })
+    }
+    const productos = await pool.query(
+      'SELECT * FROM productos WHERE admin_id = $1',
+      [tienda.rows[0].id]
+    )
+    const { password, ...tiendaSegura } = tienda.rows[0]
+    res.json({ tienda: tiendaSegura, productos: productos.rows })
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener tienda' })
   }
 })
 
