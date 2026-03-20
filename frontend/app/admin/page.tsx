@@ -22,7 +22,7 @@ export default function AdminPage() {
   const [imagenEditar, setImagenEditar] = useState<File | null>(null)
   const [adminInfo, setAdminInfo] = useState<any>(null)
   const [mostrarConfig, setMostrarConfig] = useState(false)
-  const [config, setConfig] = useState({ nombre: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
+  const [config, setConfig] = useState({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
   const [logoConfig, setLogoConfig] = useState<File | null>(null)
   const [mensajeConfig, setMensajeConfig] = useState('')
 
@@ -131,6 +131,7 @@ export default function AdminPage() {
     if (data) {
       setConfig({
         nombre: data.nombre || '',
+        slug: data.slug || '',
         whatsapp: data.whatsapp || '',
         color: data.color || '#ffffff',
         descripcion_tienda: data.descripcion_tienda || ''
@@ -235,7 +236,7 @@ export default function AdminPage() {
             className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
             ⚙️ Mi tienda
           </button>
-          <a href={`/tienda/${config.nombre?.toLowerCase().replace(/ /g, '-') || ''}`}
+          <a href={`/tienda/${config.slug || ''}`}
 
             className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
             👁️ Ver catálogo

@@ -56,7 +56,7 @@ router.get('/configuracion', verificarToken, async (req, res) => {
   try {
     const adminId = req.admin.id
     const result = await pool.query(
-      'SELECT id, nombre, email, rol, plan, whatsapp, color, logo, descripcion_tienda FROM admins WHERE id=$1',
+      'SELECT id, nombre, slug, email, rol, plan, whatsapp, color, logo, descripcion_tienda FROM admins WHERE id=$1',
       [adminId]
     )
     res.json(result.rows[0])
@@ -70,7 +70,7 @@ router.get('/:slug', async (req, res) => {
   try {
     const { slug } = req.params
     const tienda = await pool.query(
-      "SELECT * FROM admins WHERE LOWER(REPLACE(nombre, ' ', '-')) = $1",
+      "SELECT * FROM admins WHERE slug = $1",
       [slug]
     )
     if (tienda.rows.length === 0) {
