@@ -20,10 +20,13 @@ export default function AdminPage() {
   const [imagen, setImagen] = useState<File | null>(null)
   const [editando, setEditando] = useState<any | null>(null)
   const [imagenEditar, setImagenEditar] = useState<File | null>(null)
+  const [adminInfo, setAdminInfo] = useState<any>(null)
 
   useEffect(() => {
     const t = localStorage.getItem('admin_token')
+    const a = localStorage.getItem('admin')
     if (t) { setToken(t); cargarProductos(t) }
+    if (a) { setAdminInfo(JSON.parse(a)) }
   }, [])
 
   async function login(e: any) {
@@ -184,6 +187,16 @@ export default function AdminPage() {
             className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition">
             {mostrarForm ? 'Cancelar' : '+ Agregar producto'}
           </button>
+          <a href={`/tienda/${adminInfo?.nombre?.toLowerCase().replace(/ /g, '-') || ''}`} target="_blank"
+            className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
+            👁️ Ver catálogo
+          </a>
+          {adminInfo?.rol === 'superadmin' && (
+            <a href="/superadmin"
+              className="border border-yellow-700 text-yellow-500 px-4 py-2 rounded-xl text-sm hover:border-yellow-500 transition">
+              👑 Superadmin
+            </a>
+          )}
           <button onClick={cerrarSesion}
             className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
             Salir
