@@ -64,6 +64,44 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   }
 })
 
+// PUT editar producto
+router.put('/:id', verificarToken, upload.single('imagen'), async (req, res) => {
+  try {
+    const { id } = req.params
+    const adminId = req.admin.id
+    const { nombre, descripcion, precio, colores, tallas } = req.body
+
+    const producto = await pool.query(
+      'SELECT * FROM productos WHERE id = $1 AND admin_id = $2',
+      [id, adminId]
+    )
+
+    if (producto.rows.length === 0) {
+      return res.status(403).json({ error: 'No tienes permiso para editar este producto' })
+    }
+
+    let imagenUrl = producto.rows[0].imagen
+
+    if (req.file) {
+      const resultado = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream({ folder: 'catalogo-whatsapp' }, (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }).end(req.file.buffer)
+      })
+      imagenUrl = resultado.secure_url
+    }
+
+    const result = await pool.query(
+      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, imagen=$4, colores=$5, tallas=$6 WHERE id=$7 AND admin_id=$8 RETURNING *',
+      [nombre, descripcion, precio, imagenUrl, colores, tallas, id, adminId]
+    )
+    res.json(result.rows[0])
+  } catch (error) {
+    res.status(500).json({ error: 'Error al editar producto' })
+  }
+})
+
 // DELETE eliminar producto
 router.delete('/:id', verificarToken, async (req, res) => {
   try {
