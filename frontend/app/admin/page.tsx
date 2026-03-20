@@ -37,6 +37,8 @@ export default function AdminPage() {
     const data = await res.json()
     if (data.token) {
       localStorage.setItem('admin_token', data.token)
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('admin', JSON.stringify(data.admin))
       setToken(data.token)
       cargarProductos(data.token)
     } else {
