@@ -21,11 +21,15 @@ export default function AdminPage() {
   const [editando, setEditando] = useState<any | null>(null)
   const [imagenEditar, setImagenEditar] = useState<File | null>(null)
   const [adminInfo, setAdminInfo] = useState<any>(null)
+  const [mostrarConfig, setMostrarConfig] = useState(false)
+  const [config, setConfig] = useState({ nombre: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
+  const [logoConfig, setLogoConfig] = useState<File | null>(null)
+  const [mensajeConfig, setMensajeConfig] = useState('')
 
   useEffect(() => {
     const t = localStorage.getItem('admin_token')
     const a = localStorage.getItem('admin')
-    if (t) { setToken(t); cargarProductos(t) }
+    if (t) { setToken(t); cargarProductos(t); cargarConfig(t) }
     if (a) { setAdminInfo(JSON.parse(a)) }
   }, [])
 
@@ -119,6 +123,46 @@ export default function AdminPage() {
     setCargando(false)
   }
 
+  async function cargarConfig(t: string) {
+    const res = await fetch(`${API}/api/tienda/configuracion`, {
+      headers: { Authorization: `Bearer ${t}` }
+    })
+    const data = await res.json()
+    if (data) {
+      setConfig({
+        nombre: data.nombre || '',
+        whatsapp: data.whatsapp || '',
+        color: data.color || '#ffffff',
+        descripcion_tienda: data.descripcion_tienda || ''
+      })
+    }
+  }
+
+  async function guardarConfig(e: any) {
+    e.preventDefault()
+    setCargando(true)
+    setMensajeConfig('')
+    const form = new FormData()
+    form.append('nombre', config.nombre)
+    form.append('whatsapp', config.whatsapp)
+    form.append('color', config.color)
+    form.append('descripcion_tienda', config.descripcion_tienda)
+    if (logoConfig) form.append('logo', logoConfig)
+
+    const res = await fetch(`${API}/api/tienda/configuracion`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` },
+      body: form
+    })
+    if (res.ok) {
+      setMensajeConfig('¡Configuración guardada!')
+      setLogoConfig(null)
+    } else {
+      setMensajeConfig('Error al guardar')
+    }
+    setCargando(false)
+  }
+
   function cerrarSesion() {
     localStorage.removeItem('admin_token')
     setToken(null)
@@ -187,6 +231,10 @@ export default function AdminPage() {
             className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition">
             {mostrarForm ? 'Cancelar' : '+ Agregar producto'}
           </button>
+          <button onClick={() => setMostrarConfig(!mostrarConfig)}
+            className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
+            ⚙️ Mi tienda
+          </button>
           <a href={`/tienda/${adminInfo?.nombre?.toLowerCase().replace(/ /g, '-') || ''}`} target="_blank"
             className="border border-gray-700 text-gray-400 px-4 py-2 rounded-xl text-sm hover:border-gray-500 transition">
             👁️ Ver catálogo
@@ -205,6 +253,33 @@ export default function AdminPage() {
       </nav>
 
       <div className="px-6 py-8 max-w-4xl mx-auto space-y-8">
+        {mostrarConfig && (
+          <form onSubmit={guardarConfig} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+            <h2 className="text-white font-bold text-lg">⚙️ Configuración de mi tienda</h2>
+            <input placeholder="Nombre de la tienda" value={config.nombre} onChange={e => setConfig({ ...config, nombre: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+            <input placeholder="Número WhatsApp (ej: 573001234567)" value={config.whatsapp} onChange={e => setConfig({ ...config, whatsapp: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+            <textarea placeholder="Descripción de la tienda" value={config.descripcion_tienda} onChange={e => setConfig({ ...config, descripcion_tienda: e.target.value })}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={2} />
+            <div className="flex items-center gap-4">
+              <label className="text-gray-400 text-sm">Color principal:</label>
+              <input type="color" value={config.color} onChange={e => setConfig({ ...config, color: e.target.value })}
+                className="w-12 h-10 rounded cursor-pointer border border-gray-700 bg-transparent" />
+              <span className="text-gray-500 text-sm">{config.color}</span>
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm block mb-2">Logo de la tienda</label>
+              <input type="file" accept="image/*" onChange={e => setLogoConfig(e.target.files?.[0] || null)} className="text-gray-400 text-sm" />
+            </div>
+            {mensajeConfig && <p className="text-green-400 text-sm">{mensajeConfig}</p>}
+            <button type="submit" disabled={cargando}
+              className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
+              {cargando ? 'Guardando...' : 'Guardar configuración'}
+            </button>
+          </form>
+        )}
+
         {mostrarForm && (
           <form onSubmit={agregarProducto} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
             <h2 className="text-white font-bold text-lg">Nuevo producto</h2>
