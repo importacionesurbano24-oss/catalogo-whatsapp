@@ -34,6 +34,7 @@ export default function AdminPage() {
   const [nuevaCategoria, setNuevaCategoria] = useState('')
   const [nuevaMarca, setNuevaMarca] = useState('')
   const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
+  const [mostrarListaProductos, setMostrarListaProductos] = useState(false)
 
   useEffect(() => {
     const t = localStorage.getItem('admin_token')
@@ -340,26 +341,26 @@ export default function AdminPage() {
             </button>
             {mostrarSubProductos && (
               <div className="space-y-1 mt-1">
-                <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false) }}
+                <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false); setMostrarListaProductos(false) }} 
                   className="text-gray-500 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-xl text-xs transition text-left w-full pl-10">
                   + Crear producto
                 </button>
-                <button onClick={() => { setMostrarForm(false); setMostrarCatMarcas(false); setMostrarConfig(false) }}
+           <button onClick={() => { setMostrarListaProductos(true); setMostrarForm(false); setMostrarCatMarcas(false); setMostrarConfig(false) }}
                   className="text-gray-500 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-xl text-xs transition text-left w-full pl-10">
                   📋 Lista de productos
                 </button>
               </div>
             )}
           </div>
-          <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarForm(false) }}
+          <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarListaProductos(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             🏷️ Marcas
           </button>
-          <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarForm(false) }}
+          <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarListaProductos(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             📂 Categorías
           </button>
-          <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarForm(false) }}
+          <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarListaProductos(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
           </button>
