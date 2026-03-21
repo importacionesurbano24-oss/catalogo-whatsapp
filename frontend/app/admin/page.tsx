@@ -501,8 +501,10 @@ export default function AdminPage() {
           </form>
         )}
 
+        {mostrarListaProductos && (
         <div>
           <h2 className="text-white font-bold text-lg mb-4">Mis productos ({productos.length})</h2>
+          
           {productos.length === 0 ? (
             <p className="text-gray-500 text-center py-12">No tienes productos aun</p>
           ) : (
