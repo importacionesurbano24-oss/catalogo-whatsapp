@@ -333,10 +333,7 @@ export default function AdminPage() {
           <h1 className="text-white font-bold text-lg mb-6 px-3">Panel Admin</h1>
         <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarForm(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
-            🏪 Mi Tienda
-          </button>
-          <button onClick={() => { setMostrarCatMarcas(false); setMostrarConfig(false); setMostrarForm(false) }}
-            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+           
             📦 Productos
           </button>
           <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false) }}
