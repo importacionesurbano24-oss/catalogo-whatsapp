@@ -8,6 +8,7 @@ const productosRoutes = require('./routes/productos')
 const authRoutes = require('./routes/auth')
 const tiendaRoutes = require('./routes/tienda')
 const superadminRoutes = require('./routes/superadmin')
+const categoriasRoutes = require('./routes/categorias')
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3000
@@ -18,6 +19,7 @@ app.use('/api/productos', productosRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/tienda', tiendaRoutes)
 app.use('/api/superadmin', superadminRoutes)
+app.use('/api', categoriasRoutes)
 
 app.get('/', (req, res) => {
   res.json({ mensaje: 'Servidor funcionando' })

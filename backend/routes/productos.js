@@ -13,34 +13,43 @@ cloudinary.config({
 
 const upload = multer({ storage: multer.memoryStorage() })
 
-// GET todos los productos (para el catálogo público — no necesita token)
+// GET todos los productos con categoría y marca (catálogo público)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM productos')
+    const result = await pool.query(`
+      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre
+      FROM productos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      LEFT JOIN marcas m ON p.marca_id = m.id
+    `)
     res.json(result.rows)
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener productos' })
   }
 })
 
-// GET productos del admin logueado
+// GET productos del admin logueado con categoría y marca
 router.get('/mis-productos', verificarToken, async (req, res) => {
   try {
     const adminId = req.admin.id
-    const result = await pool.query(
-      'SELECT * FROM productos WHERE admin_id = $1 ORDER BY created_at DESC',
-      [adminId]
-    )
+    const result = await pool.query(`
+      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre
+      FROM productos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      LEFT JOIN marcas m ON p.marca_id = m.id
+      WHERE p.admin_id = $1
+      ORDER BY p.created_at DESC
+    `, [adminId])
     res.json(result.rows)
   } catch (error) {
     res.status(500).json({ error: 'Error al obtener tus productos' })
   }
 })
 
-// POST crear producto (protegido con token)
+// POST crear producto con categoría y marca
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
-    const { nombre, descripcion, precio, colores, tallas } = req.body
+    const { nombre, descripcion, precio, colores, tallas, categoria_id, marca_id } = req.body
     const admin_id = req.admin.id
     let imagenUrl = null
 
@@ -55,8 +64,8 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
     }
 
     const result = await pool.query(
-      'INSERT INTO productos (nombre, descripcion, precio, imagen, colores, tallas, admin_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [nombre, descripcion, precio, imagenUrl, colores, tallas, admin_id]
+      'INSERT INTO productos (nombre, descripcion, precio, imagen, colores, tallas, admin_id, categoria_id, marca_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+      [nombre, descripcion, precio, imagenUrl, colores, tallas, admin_id, categoria_id || null, marca_id || null]
     )
     res.json(result.rows[0])
   } catch (error) {
@@ -64,12 +73,12 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   }
 })
 
-// PUT editar producto
+// PUT editar producto con categoría y marca
 router.put('/:id', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
     const { id } = req.params
     const adminId = req.admin.id
-    const { nombre, descripcion, precio, colores, tallas } = req.body
+    const { nombre, descripcion, precio, colores, tallas, categoria_id, marca_id } = req.body
 
     const producto = await pool.query(
       'SELECT * FROM productos WHERE id = $1 AND admin_id = $2',
@@ -93,8 +102,8 @@ router.put('/:id', verificarToken, upload.single('imagen'), async (req, res) => 
     }
 
     const result = await pool.query(
-      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, imagen=$4, colores=$5, tallas=$6 WHERE id=$7 AND admin_id=$8 RETURNING *',
-      [nombre, descripcion, precio, imagenUrl, colores, tallas, id, adminId]
+      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, imagen=$4, colores=$5, tallas=$6, categoria_id=$7, marca_id=$8 WHERE id=$9 AND admin_id=$10 RETURNING *',
+      [nombre, descripcion, precio, imagenUrl, colores, tallas, categoria_id || null, marca_id || null, id, adminId]
     )
     res.json(result.rows[0])
   } catch (error) {
