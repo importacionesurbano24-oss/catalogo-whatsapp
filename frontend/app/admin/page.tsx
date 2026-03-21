@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [mostrarCatMarcas, setMostrarCatMarcas] = useState(false)
   const [nuevaCategoria, setNuevaCategoria] = useState('')
   const [nuevaMarca, setNuevaMarca] = useState('')
+  const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
 
   useEffect(() => {
     const t = localStorage.getItem('admin_token')
@@ -331,15 +332,25 @@ export default function AdminPage() {
         {/* SIDEBAR */}
         <aside className="w-56 min-h-screen bg-gray-950 border-r border-gray-800 p-4 flex flex-col gap-1 fixed">
           <h1 className="text-white font-bold text-lg mb-6 px-3">Panel Admin</h1>
-        <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarForm(false) }}
-            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
-           
-            📦 Productos
-          </button>
-          <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false) }}
-            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full pl-8">
-          📄Crear producto
-          </button>
+          <div>
+            <button onClick={() => setMostrarSubProductos(!mostrarSubProductos)}
+              className="flex items-center justify-between text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+              <span className="flex items-center gap-3">📦 Productos</span>
+              <span className="text-xs">{mostrarSubProductos ? '▲' : '▼'}</span>
+            </button>
+            {mostrarSubProductos && (
+              <div className="space-y-1 mt-1">
+                <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false) }}
+                  className="text-gray-500 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-xl text-xs transition text-left w-full pl-10">
+                  + Crear producto
+                </button>
+                <button onClick={() => { setMostrarForm(false); setMostrarCatMarcas(false); setMostrarConfig(false) }}
+                  className="text-gray-500 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-xl text-xs transition text-left w-full pl-10">
+                  📋 Lista de productos
+                </button>
+              </div>
+            )}
+          </div>
           <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarForm(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             🏷️ Marcas
@@ -369,7 +380,6 @@ export default function AdminPage() {
             </button>
           </div>
         </aside>
-
       <div className="ml-56 px-6 py-8 max-w-4xl mx-auto space-y-8"></div>
 
         {mostrarCatMarcas && (
