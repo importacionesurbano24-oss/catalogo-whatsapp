@@ -327,41 +327,49 @@ export default function AdminPage() {
 
   return (
     <main className="min-h-screen bg-black">
-      <nav className="bg-gray-950 border-b border-gray-800 px-4 py-4">
-        <div className="flex flex-wrap justify-between items-center gap-3">
-          <h1 className="text-white font-bold text-lg">Panel Admin</h1>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => setMostrarForm(!mostrarForm)}
-              className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition">
-              {mostrarForm ? 'Cancelar' : '+ Producto'}
-            </button>
-            <button onClick={() => setMostrarCatMarcas(!mostrarCatMarcas)}
-              className="border border-gray-700 text-gray-400 px-3 py-2 rounded-xl text-sm hover:border-gray-500 transition">
-              🏷️ Cat/Marcas
-            </button>
-            <button onClick={() => setMostrarConfig(!mostrarConfig)}
-              className="border border-gray-700 text-gray-400 px-3 py-2 rounded-xl text-sm hover:border-gray-500 transition">
-              ⚙️ Mi tienda
-            </button>
-            <a href={`/tienda/${config.slug || ''}`}
-              className="border border-gray-700 text-gray-400 px-3 py-2 rounded-xl text-sm hover:border-gray-500 transition">
-              👁️ Catalogo
+     <div className="flex">
+        {/* SIDEBAR */}
+        <aside className="w-56 min-h-screen bg-gray-950 border-r border-gray-800 p-4 flex flex-col gap-1 fixed">
+          <h1 className="text-white font-bold text-lg mb-6 px-3">Panel Admin</h1>
+          <a href={`/tienda/${config.slug || ''}`}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
+            🏪 Mi Tienda
+          </a>
+          <button onClick={() => { setMostrarCatMarcas(false); setMostrarConfig(false); setMostrarForm(false) }}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+            📦 Productos
+          </button>
+          <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarForm(false) }}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+            🏷️ Marcas
+          </button>
+          <button onClick={() => { setMostrarCatMarcas(true); setMostrarConfig(false); setMostrarForm(false) }}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+            📂 Categorías
+          </button>
+          <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarForm(false) }}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+            ⚙️ Configuración
+          </button>
+          <a href={`/tienda/${config.slug || ''}`}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
+            👁️ Ver Catálogo
+          </a>
+          {adminInfo?.rol === 'superadmin' && (
+            <a href="/superadmin"
+              className="flex items-center gap-3 text-yellow-500 hover:text-yellow-400 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
+              👑 Superadmin
             </a>
-            {adminInfo?.rol === 'superadmin' && (
-              <a href="/superadmin"
-                className="border border-yellow-700 text-yellow-500 px-3 py-2 rounded-xl text-sm hover:border-yellow-500 transition">
-                👑 Super
-              </a>
-            )}
+          )}
+          <div className="mt-auto">
             <button onClick={cerrarSesion}
-              className="border border-gray-700 text-gray-400 px-3 py-2 rounded-xl text-sm hover:border-gray-500 transition">
-              Salir
+              className="flex items-center gap-3 text-gray-500 hover:text-red-400 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition w-full text-left">
+              🚪 Cerrar sesión
             </button>
           </div>
-        </div>
-      </nav>
+        </aside>
 
-      <div className="px-4 sm:px-6 py-8 max-w-4xl mx-auto space-y-8">
+      <div className="ml-56 px-6 py-8 max-w-4xl mx-auto space-y-8"></div>
 
         {mostrarCatMarcas && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
