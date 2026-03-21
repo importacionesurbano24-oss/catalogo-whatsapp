@@ -331,10 +331,10 @@ export default function AdminPage() {
         {/* SIDEBAR */}
         <aside className="w-56 min-h-screen bg-gray-950 border-r border-gray-800 p-4 flex flex-col gap-1 fixed">
           <h1 className="text-white font-bold text-lg mb-6 px-3">Panel Admin</h1>
-          <a href={`/tienda/${config.slug || ''}`}
-            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
+        <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarForm(false) }}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             🏪 Mi Tienda
-          </a>
+          </button>
           <button onClick={() => { setMostrarCatMarcas(false); setMostrarConfig(false); setMostrarForm(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             📦 Productos
