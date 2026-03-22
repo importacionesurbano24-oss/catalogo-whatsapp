@@ -69,7 +69,8 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
     )
     res.json(result.rows[0])
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear producto' })
+    console.log('Error al crear producto:', error.message)
+    res.status(500).json({ error: 'Error al crear producto: ' + error.message })
   }
 })
 
