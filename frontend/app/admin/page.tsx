@@ -57,13 +57,15 @@ export default function AdminPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
     })
+    console.log('STATUS LOGIN:', res.status)
     const data = await res.json()
+    console.log('DATA LOGIN:', data)
     if (data.token) {
       localStorage.setItem('admin_token', data.token)
       localStorage.setItem('token', data.token)
       localStorage.setItem('admin', JSON.stringify(data.admin))
       setToken(data.token)
-      setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
+      
 
       setAdminInfo(data.admin) 
       cargarProductos(data.token)
@@ -378,18 +380,26 @@ function slugSeguro() {
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
           </button>
-         <button
- onClick={() => {
-  const s = slugSeguro()
-  if (!s) {
-    alert('Primero configura el nombre o slug de tu tienda en Configuración')
-    return
-  }
-  window.open(`/tienda/${s}`, '_blank')
-}}
+<button
+  onClick={() => {
+    console.log('CONFIG ACTUAL:', config)
+
+    const s = slugSeguro()
+
+    console.log('SLUG FINAL:', s)
+
+    if (!s) {
+      alert('Primero configura el nombre o slug de tu tienda en Configuración')
+      return
+    }
+
+    window.open(`/tienda/${s}`, '_blank')
+  }}
+  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition"
 >
   👁️ Ver Catálogo
 </button>
+  
           {adminInfo?.rol === 'superadmin' && (
             <a href="/superadmin"
               className="flex items-center gap-3 text-yellow-500 hover:text-yellow-400 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
