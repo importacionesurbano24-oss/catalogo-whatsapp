@@ -63,10 +63,11 @@ export default function AdminPage() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('admin', JSON.stringify(data.admin))
       setToken(data.token)
+      setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
 
       setAdminInfo(data.admin) 
       cargarProductos(data.token)
-      cargarConfig(data.token) 
+      await cargarConfig(data.token)
       cargarCategorias(data.token)
       cargarMarcas(data.token)
     } else {
@@ -368,10 +369,17 @@ export default function AdminPage() {
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
           </button>
-          <a href={`/tienda/${config.slug || ''}`} target="_blank"
-            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
-            👁️ Ver Catálogo
-          </a>
+         <button
+  onClick={() => window.open(`/tienda/${config.slug}`, '_blank')}
+  disabled={!config.slug}
+  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
+    config.slug
+      ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+      : 'text-gray-600 cursor-not-allowed'
+  }`}
+>
+  👁️ Ver Catálogo
+</button>
           {adminInfo?.rol === 'superadmin' && (
             <a href="/superadmin"
               className="flex items-center gap-3 text-yellow-500 hover:text-yellow-400 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
