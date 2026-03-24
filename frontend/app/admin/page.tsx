@@ -266,6 +266,15 @@ export default function AdminPage() {
     setAdminInfo(null)
     setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
   }
+function slugSeguro() {
+  const base = (config.slug || config.nombre || '').trim().toLowerCase()
+  return base
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+}
 
   if (editando) return (
     <main className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -370,13 +379,14 @@ export default function AdminPage() {
             ⚙️ Configuración
           </button>
          <button
-  onClick={() => window.open(`/tienda/${config.slug}`, '_blank')}
-  disabled={!config.slug}
-  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition ${
-    config.slug
-      ? 'text-gray-400 hover:text-white hover:bg-gray-800'
-      : 'text-gray-600 cursor-not-allowed'
-  }`}
+ onClick={() => {
+  const s = slugSeguro()
+  if (!s) {
+    alert('Primero configura el nombre o slug de tu tienda en Configuración')
+    return
+  }
+  window.open(`/tienda/${s}`, '_blank')
+}}
 >
   👁️ Ver Catálogo
 </button>
@@ -403,7 +413,7 @@ export default function AdminPage() {
                 <input placeholder="Nueva categoria" value={nuevaCategoria} onChange={e => setNuevaCategoria(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), crearCategoria())}
                   className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-500" />
-                <button onClick={crearCategoria} disabled={cargando}
+                <button onClick={crearCategoria} disabled={!slugSeguro()}
                   className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition disabled:opacity-50">
                   +
                 </button>
