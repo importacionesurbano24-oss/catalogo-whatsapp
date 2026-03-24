@@ -63,7 +63,10 @@ export default function AdminPage() {
       localStorage.setItem('token', data.token)
       localStorage.setItem('admin', JSON.stringify(data.admin))
       setToken(data.token)
+
+      setAdminInfo(data.admin) 
       cargarProductos(data.token)
+      cargarConfig(data.token) 
       cargarCategorias(data.token)
       cargarMarcas(data.token)
     } else {
@@ -260,6 +263,7 @@ export default function AdminPage() {
     setToken(null)
     setProductos([])
     setAdminInfo(null)
+    setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
   }
 
   if (editando) return (
