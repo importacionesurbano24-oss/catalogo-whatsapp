@@ -1,0 +1,166 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
+
+function formatearPrecio(precio: any) {
+  return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
+}
+
+export default function ProductoDetalle() {
+  const params = useParams()
+  const slug = params.slug
+  const id = params.id
+  const [producto, setProducto] = useState<any>(null)
+  const [tienda, setTienda] = useState<any>(null)
+  const [colorSel, setColorSel] = useState('')
+  const [tallaSel, setTallaSel] = useState('')
+  const [agregado, setAgregado] = useState(false)
+
+  useEffect(() => {
+    fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.tienda) {
+          setTienda(data.tienda)
+          const prod = (data.productos || []).find((p: any) => String(p.id) === String(id))
+          setProducto(prod || null)
+        }
+      })
+      .catch(() => {})
+  }, [slug, id])
+
+  function precioFinal() {
+    return producto.precio_descuento || producto.precio
+  }
+
+  function comprarWhatsApp() {
+    const numero = tienda?.whatsapp || '573028663986'
+    const mensaje = `¡Hola! Me interesa este producto:\n\n• ${producto.nombre}\n${colorSel ? `Color: ${colorSel}\n` : ''}${tallaSel ? `Talla: ${tallaSel}\n` : ''}💰 Precio: ${formatearPrecio(precioFinal())}`
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`
+    window.open(url, '_blank')
+  }
+
+  function agregarYVolver() {
+    const carritoActual = JSON.parse(localStorage.getItem('carrito_' + slug) || '[]')
+    carritoActual.push({
+      ...producto,
+      colorSeleccionado: colorSel,
+      tallaSeleccionada: tallaSel
+    })
+    localStorage.setItem('carrito_' + slug, JSON.stringify(carritoActual))
+    setAgregado(true)
+    setTimeout(() => setAgregado(false), 1500)
+  }
+
+  if (!producto) return <div className="min-h-screen bg-black flex items-center justify-center text-white text-lg">Cargando producto...</div>
+
+  return (
+    <main className="min-h-screen bg-black">
+      {/* NAVBAR */}
+      <nav className="bg-gray-950 border-b border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div>
+          <h1 className="text-white text-lg font-bold tracking-wide">{tienda?.nombre}</h1>
+          <p className="text-gray-500 text-xs">Catálogo oficial</p>
+        </div>
+        <a href={`/tienda/${slug}`} className="text-gray-400 hover:text-white text-sm transition">
+          ← Volver al catálogo
+        </a>
+      </nav>
+
+      {/* DETALLE */}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* IMAGEN */}
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden aspect-square flex items-center justify-center">
+            {producto.imagen ? (
+              <img src={producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-4" />
+            ) : (
+              <span className="text-gray-600 text-8xl">📦</span>
+            )}
+          </div>
+
+          {/* INFO */}
+          <div className="flex flex-col gap-4">
+            <h2 className="text-white text-2xl font-bold">{producto.nombre}</h2>
+
+            {producto.categoria_nombre && (
+              <span className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full w-fit">📂 {producto.categoria_nombre}</span>
+            )}
+
+            {producto.marca_nombre && (
+              <span className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full w-fit">🏷️ {producto.marca_nombre}</span>
+            )}
+
+            {producto.descripcion && (
+              <p className="text-gray-400 text-sm leading-relaxed">{producto.descripcion}</p>
+            )}
+
+            {/* PRECIO */}
+            <div className="mt-2">
+              {producto.precio_descuento ? (
+                <div className="flex items-center gap-3">
+                  <span className="line-through text-gray-500 text-lg">{formatearPrecio(producto.precio)}</span>
+                  <span className="text-green-400 text-3xl font-bold">{formatearPrecio(producto.precio_descuento)}</span>
+                </div>
+              ) : (
+                <span className="text-white text-3xl font-bold">{formatearPrecio(producto.precio)}</span>
+              )}
+            </div>
+
+            {/* COLORES */}
+            {producto.colores && producto.colores.trim() !== '' && (
+              <div>
+                <label className="text-gray-400 text-sm mb-1 block">Color</label>
+                <select value={colorSel} onChange={e => setColorSel(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-gray-500">
+                  <option value="">🎨 Elegir color</option>
+                  {producto.colores.split(',').map((color: string, i: number) => (
+                    <option key={i} value={color.trim()}>{color.trim()}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* TALLAS */}
+            {producto.tallas && producto.tallas.trim() !== '' && (
+              <div>
+                <label className="text-gray-400 text-sm mb-1 block">Talla</label>
+                <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-gray-500">
+                  <option value="">📏 Elegir talla</option>
+                  {producto.tallas.split(',').map((talla: string, i: number) => (
+                    <option key={i} value={talla.trim()}>{talla.trim()}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* BOTONES */}
+            <div className="flex flex-col gap-3 mt-4">
+              <button
+                onClick={agregarYVolver}
+                className={`w-full font-bold py-3 rounded-xl transition-all duration-300 text-sm ${
+                  agregado
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white hover:bg-gray-200 text-black'
+                }`}
+              >
+                {agregado ? '✅ Agregado al carrito!' : '🛒 Agregar al carrito'}
+              </button>
+              <button
+                onClick={comprarWhatsApp}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+              >
+                💬 Comprar por WhatsApp
+              </button>
+              <a href={`/tienda/${slug}`}
+                className="w-full text-center border border-gray-700 text-gray-400 hover:text-white font-bold py-3 rounded-xl transition text-sm block">
+                ← Volver al catálogo
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}

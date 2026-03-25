@@ -6,7 +6,7 @@ function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
 }
 
-function ProductoCard({ producto, onAgregar }: any) {
+function ProductoCard({ producto, onAgregar, slug }: any) {
   const [colorSel, setColorSel] = useState('')
   const [tallaSel, setTallaSel] = useState('')
   const [agregado, setAgregado] = useState(false)
@@ -19,7 +19,7 @@ function ProductoCard({ producto, onAgregar }: any) {
 
   return (
     <div className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 flex flex-col">
-      <div className="relative w-full aspect-square bg-gray-800 overflow-hidden">
+      <a href={`/tienda/${slug}/producto/${producto.id}`} className="relative w-full aspect-square bg-gray-800 overflow-hidden block cursor-pointer">
         {producto.imagen ? (
           <img
             src={producto.imagen}
@@ -31,7 +31,7 @@ function ProductoCard({ producto, onAgregar }: any) {
             <span className="text-gray-600 text-6xl">📦</span>
           </div>
         )}
-      </div>
+      </a>
       <div className="p-4 flex flex-col flex-1">
         <h2 className="text-white text-base font-semibold leading-tight">{producto.nombre}</h2>
         {producto.descripcion && (
@@ -117,10 +117,11 @@ export default function TiendaPage() {
   function totalCarrito() {
     return carrito.reduce((sum, p) => sum + Number(p.precio_descuento || p.precio), 0)
   }
+
   function comprarWhatsApp() {
     const numero = tienda?.whatsapp || '573028663986'
     const items = carrito.map(p =>
-      `• ${p.nombre} | Color: ${p.colorSeleccionado || 'N/A'} | Talla: ${p.tallaSeleccionada || 'N/A'} | ${formatearPrecio(p.precio)}`
+      `• ${p.nombre} | Color: ${p.colorSeleccionado || 'N/A'} | Talla: ${p.tallaSeleccionada || 'N/A'} | ${formatearPrecio(p.precio_descuento || p.precio)}`
     ).join('\n')
     const total = formatearPrecio(totalCarrito())
     const mensaje = `¡Hola! Quiero comprar:\n\n${items}\n\n💰 Total: ${total}`
@@ -202,7 +203,7 @@ export default function TiendaPage() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {productos.map(producto => (
-              <ProductoCard key={producto.id} producto={producto} onAgregar={agregarAlCarrito} />
+              <ProductoCard key={producto.id} producto={producto} onAgregar={agregarAlCarrito} slug={slug} />
             ))}
           </div>
         )}
