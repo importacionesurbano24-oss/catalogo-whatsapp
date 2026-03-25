@@ -75,7 +75,8 @@ useEffect(() => {
       setToken(data.token)
       
 
-      setAdminInfo(data.admin) 
+      setAdminInfo(data.admin)
+      setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
       cargarProductos(data.token)
       await cargarConfig(data.token)
       cargarCategorias(data.token)
