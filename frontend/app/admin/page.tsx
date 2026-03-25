@@ -396,7 +396,6 @@ export default function AdminPage() {
           <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarListaProductos(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
-         
           </button>
           <button
             onClick={() => {
