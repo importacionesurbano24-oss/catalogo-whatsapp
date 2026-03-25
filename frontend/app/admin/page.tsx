@@ -454,7 +454,7 @@ function slugSeguro() {
             </button>
           </div>
         </aside>
-      <div className="ml-56 px-6 py-8 max-w-4xl mx-auto space-y-8"></div>
+      <div className="ml-56 px-6 py-8 max-w-4xl mx-auto space-y-8">
 
         {mostrarCatMarcas && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -619,7 +619,8 @@ function slugSeguro() {
               ))}
             </div>
           )}
-        </div>
+  </div>
+      </div>
       </div>
     </main>
   )
