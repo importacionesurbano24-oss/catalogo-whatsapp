@@ -6,91 +6,15 @@ function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
 }
 
-function ProductoCard({ producto, onAgregar, slug }: any) {
+export default function ProductoDetalle() {
+  const params = useParams()
+  const slug = params.slug
+  const id = params.id
+  const [producto, setProducto] = useState<any>(null)
+  const [tienda, setTienda] = useState<any>(null)
   const [colorSel, setColorSel] = useState('')
   const [tallaSel, setTallaSel] = useState('')
   const [agregado, setAgregado] = useState(false)
-
-  function handleAgregar() {
-    onAgregar(producto, colorSel, tallaSel)
-    setAgregado(true)
-    setTimeout(() => setAgregado(false), 1500)
-  }
-
-  return (
-    <div className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 flex flex-col">
-      <a href={`/tienda/${slug}/producto/${producto.id}`} className="relative w-full aspect-square bg-gray-800 overflow-hidden block cursor-pointer">
-        {producto.imagen ? (
-          <img
-            src={producto.imagen}
-            alt={producto.nombre}
-            className="w-full h-full object-contain p-2"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-gray-600 text-6xl">📦</span>
-          </div>
-        )}
-      </a>
-      <div className="p-4 flex flex-col flex-1">
-        <h2 className="text-white text-base font-semibold leading-tight">{producto.nombre}</h2>
-        {producto.descripcion && (
-          <p className="text-gray-500 text-sm mt-1 line-clamp-2">{producto.descripcion}</p>
-        )}
-        <div className="mt-3 space-y-2">
-          {producto.colores && producto.colores.trim() !== '' && (
-            <select value={colorSel} onChange={e => setColorSel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
-              <option value="">🎨 Elegir color</option>
-              {producto.colores.split(',').map((color: string, i: number) => (
-                <option key={i} value={color.trim()}>{color.trim()}</option>
-              ))}
-            </select>
-          )}
-          {producto.tallas && producto.tallas.trim() !== '' && (
-            <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
-              <option value="">📏 Elegir talla</option>
-              {producto.tallas.split(',').map((talla: string, i: number) => (
-                <option key={i} value={talla.trim()}>{talla.trim()}</option>
-              ))}
-            </select>
-          )}
-        </div>
-        <div className="mt-auto pt-4">
-          <p className="text-white font-bold text-xl">
-            {producto.precio_descuento ? (
-              <>
-                <span className="line-through text-gray-500 text-sm mr-2">{formatearPrecio(producto.precio)}</span>
-                <span className="text-green-400">{formatearPrecio(producto.precio_descuento)}</span>
-              </>
-            ) : (
-              formatearPrecio(producto.precio)
-            )}
-          </p>
-          <button
-            onClick={handleAgregar}
-            className={`mt-2 w-full font-bold py-2.5 rounded-xl transition-all duration-300 text-sm ${
-              agregado
-                ? 'bg-green-500 text-white'
-                : 'bg-white hover:bg-gray-200 text-black'
-            }`}
-          >
-            {agregado ? '✅ Agregado!' : '🛒 Agregar al carrito'}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default function TiendaPage() {
-  const params = useParams()
-  const slug = params.slug
-  const [tienda, setTienda] = useState<any>(null)
-  const [productos, setProductos] = useState<any[]>([])
-  const [carrito, setCarrito] = useState<any[]>([])
-  const [mostrarCarrito, setMostrarCarrito] = useState(false)
 
   useEffect(() => {
     fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
@@ -98,115 +22,136 @@ export default function TiendaPage() {
       .then(data => {
         if (data.tienda) {
           setTienda(data.tienda)
-          setProductos(data.productos || [])
-        } else {
-          setTienda({ error: true })
+          const prod = (data.productos || []).find((p: any) => String(p.id) === String(id))
+          setProducto(prod || null)
         }
       })
-      .catch(() => setTienda({ error: true }))
-  }, [slug])
+      .catch(() => {})
+  }, [slug, id])
 
-  function agregarAlCarrito(producto: any, color: string, talla: string) {
-    setCarrito([...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }])
-  }
-
-  function eliminarDelCarrito(index: number) {
-    setCarrito(carrito.filter((_, i) => i !== index))
-  }
-
-  function totalCarrito() {
-    return carrito.reduce((sum, p) => sum + Number(p.precio_descuento || p.precio), 0)
+  function precioFinal() {
+    return producto.precio_descuento || producto.precio
   }
 
   function comprarWhatsApp() {
     const numero = tienda?.whatsapp || '573028663986'
-    const items = carrito.map(p =>
-      `• ${p.nombre} | Color: ${p.colorSeleccionado || 'N/A'} | Talla: ${p.tallaSeleccionada || 'N/A'} | ${formatearPrecio(p.precio_descuento || p.precio)}`
-    ).join('\n')
-    const total = formatearPrecio(totalCarrito())
-    const mensaje = `¡Hola! Quiero comprar:\n\n${items}\n\n💰 Total: ${total}`
+    const mensaje = `¡Hola! Me interesa este producto:\n\n• ${producto.nombre}\n${colorSel ? `Color: ${colorSel}\n` : ''}${tallaSel ? `Talla: ${tallaSel}\n` : ''}💰 Precio: ${formatearPrecio(precioFinal())}`
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`
     window.open(url, '_blank')
   }
 
-  if (!tienda) return <div className="min-h-screen bg-black flex items-center justify-center text-white text-lg">Cargando tienda...</div>
-  if (tienda.error) return <div className="min-h-screen bg-black flex items-center justify-center text-white text-lg">Tienda no encontrada</div>
+  function agregarYVolver() {
+    const carritoActual = JSON.parse(localStorage.getItem('carrito_' + slug) || '[]')
+    carritoActual.push({
+      ...producto,
+      colorSeleccionado: colorSel,
+      tallaSeleccionada: tallaSel
+    })
+    localStorage.setItem('carrito_' + slug, JSON.stringify(carritoActual))
+    setAgregado(true)
+    setTimeout(() => setAgregado(false), 1500)
+  }
+
+  if (!producto) return <div className="min-h-screen bg-black flex items-center justify-center text-white text-lg">Cargando producto...</div>
 
   return (
     <main className="min-h-screen bg-black">
-      {/* NAVBAR */}
       <nav className="bg-gray-950 border-b border-gray-800 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div>
-          <h1 className="text-white text-lg font-bold tracking-wide">{tienda.nombre}</h1>
+          <h1 className="text-white text-lg font-bold tracking-wide">{tienda?.nombre}</h1>
           <p className="text-gray-500 text-xs">Catálogo oficial</p>
         </div>
-        <button
-          onClick={() => setMostrarCarrito(!mostrarCarrito)}
-          className="relative bg-white text-black font-bold px-4 py-2 rounded-xl flex items-center gap-2 text-sm hover:bg-gray-200 transition"
-        >
-          🛒 Carrito
-          {carrito.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
-              {carrito.length}
-            </span>
-          )}
-        </button>
+        <a href={`/tienda/${slug}`} className="text-gray-400 hover:text-white text-sm transition">
+          ← Volver al catálogo
+        </a>
       </nav>
 
-      {/* CARRITO DESPLEGABLE */}
-      {mostrarCarrito && (
-        <div className="bg-gray-950 border-b border-gray-800 px-6 py-5">
-          {carrito.length === 0 ? (
-            <p className="text-gray-500 text-sm">Tu carrito está vacío</p>
-          ) : (
-            <>
-              <h2 className="text-white font-bold text-lg mb-3">Tu pedido ({carrito.length})</h2>
-              <div className="space-y-2 mb-4">
-                {carrito.map((p, i) => (
-                  <div key={i} className="flex justify-between items-center bg-gray-900 rounded-lg px-4 py-2 border border-gray-800">
-                    <div>
-                      <p className="text-white text-sm font-medium">{p.nombre}</p>
-                      <p className="text-gray-500 text-xs">
-                        {p.colorSeleccionado && `Color: ${p.colorSeleccionado}`}
-                        {p.colorSeleccionado && p.tallaSeleccionada && ' | '}
-                        {p.tallaSeleccionada && `Talla: ${p.tallaSeleccionada}`}
-                        {' — '}{formatearPrecio(p.precio_descuento || p.precio)}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => eliminarDelCarrito(i)}
-                      className="text-red-400 hover:text-red-300 text-sm ml-3"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-between items-center">
-                <p className="text-white font-bold text-lg">Total: {formatearPrecio(totalCarrito())}</p>
-                <button
-                  onClick={comprarWhatsApp}
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-2.5 rounded-xl transition flex items-center gap-2 text-sm"
-                >
-                  💬 Enviar pedido por WhatsApp
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* CATALOGO */}
-      <div className="px-6 py-8">
-        {productos.length === 0 ? (
-          <p className="text-gray-500 text-center py-20">Esta tienda aún no tiene productos</p>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {productos.map(producto => (
-              <ProductoCard key={producto.id} producto={producto} onAgregar={agregarAlCarrito} slug={slug} />
-            ))}
+      <div className="max-w-4xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden aspect-square flex items-center justify-center">
+            {producto.imagen ? (
+              <img src={producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-4" />
+            ) : (
+              <span className="text-gray-600 text-8xl">📦</span>
+            )}
           </div>
-        )}
+
+          <div className="flex flex-col gap-4">
+            <h2 className="text-white text-2xl font-bold">{producto.nombre}</h2>
+
+            {producto.categoria_nombre && (
+              <span className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full w-fit">📂 {producto.categoria_nombre}</span>
+            )}
+
+            {producto.marca_nombre && (
+              <span className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full w-fit">🏷️ {producto.marca_nombre}</span>
+            )}
+
+            {producto.descripcion && (
+              <p className="text-gray-400 text-sm leading-relaxed">{producto.descripcion}</p>
+            )}
+
+            <div className="mt-2">
+              {producto.precio_descuento ? (
+                <div className="flex items-center gap-3">
+                  <span className="line-through text-gray-500 text-lg">{formatearPrecio(producto.precio)}</span>
+                  <span className="text-green-400 text-3xl font-bold">{formatearPrecio(producto.precio_descuento)}</span>
+                </div>
+              ) : (
+                <span className="text-white text-3xl font-bold">{formatearPrecio(producto.precio)}</span>
+              )}
+            </div>
+
+            {producto.colores && producto.colores.trim() !== '' && (
+              <div>
+                <label className="text-gray-400 text-sm mb-1 block">Color</label>
+                <select value={colorSel} onChange={e => setColorSel(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-gray-500">
+                  <option value="">🎨 Elegir color</option>
+                  {producto.colores.split(',').map((color: string, i: number) => (
+                    <option key={i} value={color.trim()}>{color.trim()}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {producto.tallas && producto.tallas.trim() !== '' && (
+              <div>
+                <label className="text-gray-400 text-sm mb-1 block">Talla</label>
+                <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
+                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-gray-500">
+                  <option value="">📏 Elegir talla</option>
+                  {producto.tallas.split(',').map((talla: string, i: number) => (
+                    <option key={i} value={talla.trim()}>{talla.trim()}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3 mt-4">
+              <button
+                onClick={agregarYVolver}
+                className={`w-full font-bold py-3 rounded-xl transition-all duration-300 text-sm ${
+                  agregado
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white hover:bg-gray-200 text-black'
+                }`}
+              >
+                {agregado ? '✅ Agregado al carrito!' : '🛒 Agregar al carrito'}
+              </button>
+              <button
+                onClick={comprarWhatsApp}
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-xl transition text-sm flex items-center justify-center gap-2"
+              >
+                💬 Comprar por WhatsApp
+              </button>
+              <a href={`/tienda/${slug}`}
+                className="w-full text-center border border-gray-700 text-gray-400 hover:text-white font-bold py-3 rounded-xl transition text-sm block">
+                ← Volver al catálogo
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   )
