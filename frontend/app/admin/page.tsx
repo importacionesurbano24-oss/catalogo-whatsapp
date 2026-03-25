@@ -16,6 +16,7 @@ export default function AdminPage() {
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [precio, setPrecio] = useState('')
+  const [precioDescuento, setPrecioDescuento] = useState('')
   const [colores, setColores] = useState('')
   const [tallas, setTallas] = useState('')
   const [imagen, setImagen] = useState<File | null>(null)
@@ -169,6 +170,7 @@ export default function AdminPage() {
     form.append('precio', precio)
     form.append('colores', colores)
     form.append('tallas', tallas)
+    form.append('precio_descuento', precioDescuento)
     if (categoriaId) form.append('categoria_id', categoriaId)
     if (marcaId) form.append('marca_id', marcaId)
     if (imagen) form.append('imagen', imagen)
@@ -179,7 +181,7 @@ export default function AdminPage() {
       body: form
     })
     if (res.ok) {
-      setNombre(''); setDescripcion(''); setPrecio('')
+      setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento('')
       setColores(''); setTallas(''); setImagen(null)
       setCategoriaId(''); setMarcaId('')
       setMostrarForm(false)
@@ -198,7 +200,7 @@ export default function AdminPage() {
   }
 
   function iniciarEdicion(p: any) {
-    setEditando({ ...p, categoria_id: p.categoria_id || '', marca_id: p.marca_id || '' })
+    setEditando({ ...p, categoria_id: p.categoria_id || '', marca_id: p.marca_id || '', precio_descuento: p.precio_descuento || '' })
     setImagenEditar(null)
   }
 
@@ -211,6 +213,7 @@ export default function AdminPage() {
     form.append('precio', editando.precio)
     form.append('colores', editando.colores || '')
     form.append('tallas', editando.tallas || '')
+    form.append('precio_descuento', editando.precio_descuento || '')
     if (editando.categoria_id) form.append('categoria_id', editando.categoria_id)
     if (editando.marca_id) form.append('marca_id', editando.marca_id)
     if (imagenEditar) form.append('imagen', imagenEditar)
@@ -306,6 +309,8 @@ export default function AdminPage() {
             className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={3} />
           <input placeholder="Precio *" type="number" value={editando.precio} onChange={e => setEditando({ ...editando, precio: e.target.value })}
             className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
+            <input placeholder="Precio con descuento (opcional)" type="number" value={editando.precio_descuento} onChange={e => setEditando({ ...editando, precio_descuento: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
           <div className="grid grid-cols-2 gap-3">
             <select value={editando.categoria_id} onChange={e => setEditando({ ...editando, categoria_id: e.target.value })}
               className="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500">
@@ -515,6 +520,8 @@ export default function AdminPage() {
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={3} />
               <input placeholder="Precio *" type="number" value={precio} onChange={e => setPrecio(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
+                <input placeholder="Precio con descuento (opcional)" type="number" value={precioDescuento} onChange={e => setPrecioDescuento(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
               <div className="grid grid-cols-2 gap-3">
                 <select value={categoriaId} onChange={e => setCategoriaId(e.target.value)}
                   className="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500">
@@ -561,7 +568,21 @@ export default function AdminPage() {
                       )}
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-semibold">{p.nombre}</p>
-                        <p className="text-gray-400 text-sm">{Number(p.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</p>
+                        <p className="text-gray-400 text-sm">
+                          {p.precio_descuento ? (
+                            <>
+                              <span className="line-through text-gray-600 mr-2">{Number(p.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
+                              <span className="text-green-400">{Number(p.precio_descuento).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</span>
+                            </>
+                          ) : (
+                            Number(p.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
+                          )}
+                        </p>
+```
+
+Guarda con `Ctrl + S`. Ahora necesito ver el archivo de la tienda pública para agregar lo mismo ahí. Súbeme este archivo:
+```
+C:\Users\Urban\OneDrive\Desktop\PROGRAMAR\catalogo-whatsapp\frontend\app\tienda\[slug]\page.tsx
                         <div className="flex flex-wrap gap-2 mt-1">
                           {p.categoria_nombre && (
                             <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">📂 {p.categoria_nombre}</span>

@@ -58,7 +58,16 @@ function ProductoCard({ producto, onAgregar }: any) {
           )}
         </div>
         <div className="mt-auto pt-4">
-          <p className="text-white font-bold text-xl">{formatearPrecio(producto.precio)}</p>
+          <p className="text-white font-bold text-xl">
+            {producto.precio_descuento ? (
+              <>
+                <span className="line-through text-gray-500 text-sm mr-2">{formatearPrecio(producto.precio)}</span>
+                <span className="text-green-400">{formatearPrecio(producto.precio_descuento)}</span>
+              </>
+            ) : (
+              formatearPrecio(producto.precio)
+            )}
+          </p>
           <button
             onClick={handleAgregar}
             className={`mt-2 w-full font-bold py-2.5 rounded-xl transition-all duration-300 text-sm ${
@@ -106,9 +115,8 @@ export default function TiendaPage() {
   }
 
   function totalCarrito() {
-    return carrito.reduce((sum, p) => sum + Number(p.precio), 0)
+    return carrito.reduce((sum, p) => sum + Number(p.precio_descuento || p.precio), 0)
   }
-
   function comprarWhatsApp() {
     const numero = tienda?.whatsapp || '573028663986'
     const items = carrito.map(p =>
@@ -161,7 +169,7 @@ export default function TiendaPage() {
                         {p.colorSeleccionado && `Color: ${p.colorSeleccionado}`}
                         {p.colorSeleccionado && p.tallaSeleccionada && ' | '}
                         {p.tallaSeleccionada && `Talla: ${p.tallaSeleccionada}`}
-                        {' — '}{formatearPrecio(p.precio)}
+                        {' — '}{formatearPrecio(p.precio_descuento || p.precio)}
                       </p>
                     </div>
                     <button

@@ -49,7 +49,7 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
 // POST crear producto con categoría y marca
 router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
   try {
-    const { nombre, descripcion, precio, colores, tallas, categoria_id, marca_id } = req.body
+    const { nombre, descripcion, precio, precio_descuento, colores, tallas, categoria_id, marca_id } = req.body
     const admin_id = req.admin.id
     let imagenUrl = null
 
@@ -62,11 +62,12 @@ router.post('/', verificarToken, upload.single('imagen'), async (req, res) => {
       })
       imagenUrl = resultado.secure_url
     }
-
+      // Validar que el admin no tenga más de 20 productos activos
     const result = await pool.query(
-      'INSERT INTO productos (nombre, descripcion, precio, imagen, colores, tallas, admin_id, categoria_id, marca_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-      [nombre, descripcion, precio, imagenUrl, colores, tallas, admin_id, categoria_id || null, marca_id || null]
+      'INSERT INTO productos (nombre, descripcion, precio, precio_descuento, imagen, colores, tallas, admin_id, categoria_id, marca_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+      [nombre, descripcion, precio, precio_descuento || null, imagenUrl, colores, tallas, admin_id, categoria_id || null, marca_id || null]
     )
+      
     res.json(result.rows[0])
   } catch (error) {
     console.log('Error al crear producto:', error.message)
@@ -79,7 +80,7 @@ router.put('/:id', verificarToken, upload.single('imagen'), async (req, res) => 
   try {
     const { id } = req.params
     const adminId = req.admin.id
-    const { nombre, descripcion, precio, colores, tallas, categoria_id, marca_id } = req.body
+    const { nombre, descripcion, precio, precio_descuento, colores, tallas, categoria_id, marca_id } = req.body
 
     const producto = await pool.query(
       'SELECT * FROM productos WHERE id = $1 AND admin_id = $2',
@@ -102,9 +103,9 @@ router.put('/:id', verificarToken, upload.single('imagen'), async (req, res) => 
       imagenUrl = resultado.secure_url
     }
 
-    const result = await pool.query(
-      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, imagen=$4, colores=$5, tallas=$6, categoria_id=$7, marca_id=$8 WHERE id=$9 AND admin_id=$10 RETURNING *',
-      [nombre, descripcion, precio, imagenUrl, colores, tallas, categoria_id || null, marca_id || null, id, adminId]
+ const result = await pool.query(
+      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, precio_descuento=$4, imagen=$5, colores=$6, tallas=$7, categoria_id=$8, marca_id=$9 WHERE id=$10 AND admin_id=$11 RETURNING *',
+      [nombre, descripcion, precio, precio_descuento || null, imagenUrl, colores, tallas, categoria_id || null, marca_id || null, id, adminId]
     )
     res.json(result.rows[0])
   } catch (error) {
