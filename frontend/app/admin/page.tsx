@@ -37,7 +37,7 @@ export default function AdminPage() {
   const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
   const [mostrarListaProductos, setMostrarListaProductos] = useState(false)
 
-useEffect(() => {
+  useEffect(() => {
     const t = localStorage.getItem('admin_token')
     if (t) {
       setToken(t)
@@ -74,7 +74,6 @@ useEffect(() => {
       localStorage.setItem('token', data.token)
       localStorage.setItem('admin', JSON.stringify(data.admin))
       setToken(data.token)
-      
 
       setAdminInfo(data.admin)
       setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
@@ -228,7 +227,7 @@ useEffect(() => {
     setCargando(false)
   }
 
-async function cargarConfig(t: string) {
+  async function cargarConfig(t: string) {
     const res = await fetch(`${API}/api/tienda/configuracion`, {
       headers: { Authorization: `Bearer ${t}` }
     })
@@ -241,7 +240,6 @@ async function cargarConfig(t: string) {
         color: data.color || '#ffffff',
         descripcion_tienda: data.descripcion_tienda || ''
       })
-      // Actualizar adminInfo con datos frescos del servidor
       setAdminInfo((prev: any) => ({
         ...prev,
         id: data.id,
@@ -286,15 +284,16 @@ async function cargarConfig(t: string) {
     setAdminInfo(null)
     setConfig({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
   }
-function slugSeguro() {
-  const base = (config.slug || config.nombre || '').trim().toLowerCase()
-  return base
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-}
+
+  function slugSeguro() {
+    const base = (config.slug || config.nombre || '').trim().toLowerCase()
+    return base
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+  }
 
   if (editando) return (
     <main className="min-h-screen bg-black flex items-center justify-center px-4">
@@ -363,7 +362,7 @@ function slugSeguro() {
 
   return (
     <main className="min-h-screen bg-black">
-     <div className="flex">
+      <div className="flex">
         {/* SIDEBAR */}
         <aside className="w-56 min-h-screen bg-gray-950 border-r border-gray-800 p-4 flex flex-col gap-1 fixed">
           <h1 className="text-white font-bold text-lg mb-6 px-3">Panel Admin</h1>
@@ -375,11 +374,11 @@ function slugSeguro() {
             </button>
             {mostrarSubProductos && (
               <div className="space-y-1 mt-1">
-                <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false); setMostrarListaProductos(false) }} 
+                <button onClick={() => { setMostrarForm(true); setMostrarCatMarcas(false); setMostrarConfig(false); setMostrarListaProductos(false) }}
                   className="text-gray-500 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-xl text-xs transition text-left w-full pl-10">
                   + Crear producto
                 </button>
-           <button onClick={() => { setMostrarListaProductos(true); setMostrarForm(false); setMostrarCatMarcas(false); setMostrarConfig(false) }}
+                <button onClick={() => { setMostrarListaProductos(true); setMostrarForm(false); setMostrarCatMarcas(false); setMostrarConfig(false) }}
                   className="text-gray-500 hover:text-white hover:bg-gray-800 px-3 py-2 rounded-xl text-xs transition text-left w-full pl-10">
                   📋 Lista de productos
                 </button>
@@ -398,49 +397,44 @@ function slugSeguro() {
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
           </button>
-<button
-  onClick={() => {
-    let slugTienda = '';
-
-    if (adminInfo && adminInfo.nombre) {
-      slugTienda = adminInfo.nombre
-        .trim()
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-');
-    } else if (config.slug || config.nombre) {
-       slugTienda = slugSeguro();
-    }
-
-    if (!slugTienda) {
-      alert('Error: No pudimos identificar tu tienda.');
-      return;
-    }
-
-    window.location.href = `/tienda/${slugTienda}`;
-  }}
-  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition w-full text-left"
->
-  👁️ Ver Catálogo
-</button>
-
-<button
-  onClick={() => {
-    const s = slugSeguro()
-    if (!s) {
-      alert('Primero configura el nombre de tu tienda en Configuración')
-      return
-    }
-    window.location.href = `/tienda/${s}`
-  }}
-  className="flex items-center gap-3 text-green-400 hover:text-green-300 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full"
->
-  🏪 Ver Tienda
-</button>
-  
+          <button
+            onClick={() => {
+              let slugTienda = '';
+              if (adminInfo && adminInfo.nombre) {
+                slugTienda = adminInfo.nombre
+                  .trim()
+                  .toLowerCase()
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, '-')
+                  .replace(/-+/g, '-');
+              } else if (config.slug || config.nombre) {
+                slugTienda = slugSeguro();
+              }
+              if (!slugTienda) {
+                alert('Error: No pudimos identificar tu tienda.');
+                return;
+              }
+              window.location.href = `/tienda/${slugTienda}`;
+            }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition w-full text-left"
+          >
+            👁️ Ver Catálogo
+          </button>
+          <button
+            onClick={() => {
+              const s = slugSeguro()
+              if (!s) {
+                alert('Primero configura el nombre de tu tienda en Configuración')
+                return
+              }
+              window.location.href = `/tienda/${s}`
+            }}
+            className="flex items-center gap-3 text-green-400 hover:text-green-300 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full"
+          >
+            🏪 Ver Tienda
+          </button>
           {adminInfo?.rol === 'superadmin' && (
             <a href="/superadmin"
               className="flex items-center gap-3 text-yellow-500 hover:text-yellow-400 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
@@ -454,173 +448,173 @@ function slugSeguro() {
             </button>
           </div>
         </aside>
-      <div className="ml-56 px-6 py-8 max-w-4xl mx-auto space-y-8">
 
-        {mostrarCatMarcas && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 space-y-4">
-              <h2 className="text-white font-bold text-lg">📂 Categorias</h2>
-              <div className="flex gap-2">
-                <input placeholder="Nueva categoria" value={nuevaCategoria} onChange={e => setNuevaCategoria(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), crearCategoria())}
-                  className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-500" />
-                <button onClick={crearCategoria} disabled={!slugSeguro()}
-                  className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition disabled:opacity-50">
-                  +
-                </button>
-              </div>
-              {categorias.length === 0 ? (
-                <p className="text-gray-500 text-sm">No tienes categorias aun</p>
-              ) : (
-                <div className="space-y-2">
-                  {categorias.map(c => (
-                    <div key={c.id} className="flex justify-between items-center bg-gray-800 rounded-lg px-3 py-2">
-                      <span className="text-white text-sm">{c.nombre}</span>
-                      <button onClick={() => eliminarCategoria(c.id)} className="text-red-400 hover:text-red-300 text-xs">✕</button>
-                    </div>
-                  ))}
+        <div className="ml-56 px-6 py-8 max-w-4xl mx-auto space-y-8">
+          {mostrarCatMarcas && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 space-y-4">
+                <h2 className="text-white font-bold text-lg">📂 Categorias</h2>
+                <div className="flex gap-2">
+                  <input placeholder="Nueva categoria" value={nuevaCategoria} onChange={e => setNuevaCategoria(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), crearCategoria())}
+                    className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-500" />
+                  <button onClick={crearCategoria} disabled={!slugSeguro()}
+                    className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition disabled:opacity-50">
+                    +
+                  </button>
                 </div>
-              )}
-            </div>
-
-            <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 space-y-4">
-              <h2 className="text-white font-bold text-lg">🏷️ Marcas</h2>
-              <div className="flex gap-2">
-                <input placeholder="Nueva marca" value={nuevaMarca} onChange={e => setNuevaMarca(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), crearMarca())}
-                  className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-500" />
-                <button onClick={crearMarca} disabled={cargando}
-                  className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition disabled:opacity-50">
-                  +
-                </button>
-              </div>
-              {marcas.length === 0 ? (
-                <p className="text-gray-500 text-sm">No tienes marcas aun</p>
-              ) : (
-                <div className="space-y-2">
-                  {marcas.map(m => (
-                    <div key={m.id} className="flex justify-between items-center bg-gray-800 rounded-lg px-3 py-2">
-                      <span className="text-white text-sm">{m.nombre}</span>
-                      <button onClick={() => eliminarMarca(m.id)} className="text-red-400 hover:text-red-300 text-xs">✕</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {mostrarConfig && (
-          <form onSubmit={guardarConfig} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
-            <h2 className="text-white font-bold text-lg">⚙️ Configuracion de mi tienda</h2>
-            <input placeholder="Nombre de la tienda" value={config.nombre} onChange={e => setConfig({ ...config, nombre: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-            <input placeholder="Numero WhatsApp (ej: 573001234567)" value={config.whatsapp} onChange={e => setConfig({ ...config, whatsapp: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-            <textarea placeholder="Descripcion de la tienda" value={config.descripcion_tienda} onChange={e => setConfig({ ...config, descripcion_tienda: e.target.value })}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={2} />
-            <div className="flex items-center gap-4">
-              <label className="text-gray-400 text-sm">Color principal:</label>
-              <input type="color" value={config.color} onChange={e => setConfig({ ...config, color: e.target.value })}
-                className="w-12 h-10 rounded cursor-pointer border border-gray-700 bg-transparent" />
-              <span className="text-gray-500 text-sm">{config.color}</span>
-            </div>
-            <div>
-              <label className="text-gray-400 text-sm block mb-2">Logo de la tienda</label>
-              <input type="file" accept="image/*" onChange={e => setLogoConfig(e.target.files?.[0] || null)} className="text-gray-400 text-sm" />
-            </div>
-            {mensajeConfig && <p className="text-green-400 text-sm">{mensajeConfig}</p>}
-            <button type="submit" disabled={cargando}
-              className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
-              {cargando ? 'Guardando...' : 'Guardar configuracion'}
-            </button>
-          </form>
-        )}
-
-        {mostrarForm && (
-          <form onSubmit={agregarProducto} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
-            <h2 className="text-white font-bold text-lg">Nuevo producto</h2>
-            <input placeholder="Nombre *" value={nombre} onChange={e => setNombre(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
-            <textarea placeholder="Descripcion" value={descripcion} onChange={e => setDescripcion(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={3} />
-            <input placeholder="Precio *" type="number" value={precio} onChange={e => setPrecio(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
-            <div className="grid grid-cols-2 gap-3">
-              <select value={categoriaId} onChange={e => setCategoriaId(e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500">
-                <option value="">📂 Categoria</option>
-                {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-              </select>
-              <select value={marcaId} onChange={e => setMarcaId(e.target.value)}
-                className="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500">
-                <option value="">🏷️ Marca</option>
-                {marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-              </select>
-            </div>
-            <input placeholder="Colores (separados por coma)" value={colores} onChange={e => setColores(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-            <input placeholder="Tallas (separadas por coma)" value={tallas} onChange={e => setTallas(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-            <div>
-              <label className="text-gray-400 text-sm block mb-2">Imagen del producto</label>
-              <input type="file" accept="image/*" onChange={e => setImagen(e.target.files?.[0] || null)}
-                className="text-gray-400 text-sm" />
-            </div>
-            <button type="submit" disabled={cargando}
-              className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
-              {cargando ? 'Guardando...' : 'Guardar producto'}
-            </button>
-          </form>
-        )}
-
-        {mostrarListaProductos && (
-        <div>
-          <h2 className="text-white font-bold text-lg mb-4">Mis productos ({productos.length})</h2>
-          
-          {productos.length === 0 ? (
-            <p className="text-gray-500 text-center py-12">No tienes productos aun</p>
-          ) : (
-            <div className="space-y-3">
-              {productos.map(p => (
-                <div key={p.id} className="bg-gray-900 rounded-2xl border border-gray-800 p-4 flex gap-4 items-center">
-                  {p.imagen ? (
-                    <img src={p.imagen} alt={p.nombre} className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
-                  ) : (
-                    <div className="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">📦</span>
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold">{p.nombre}</p>
-                    <p className="text-gray-400 text-sm">{Number(p.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</p>
-                    <div className="flex flex-wrap gap-2 mt-1">
-                      {p.categoria_nombre && (
-                        <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">📂 {p.categoria_nombre}</span>
-                      )}
-                      {p.marca_nombre && (
-                        <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">🏷️ {p.marca_nombre}</span>
-                      )}
-                      {p.colores && <span className="text-gray-500 text-xs">Colores: {p.colores}</span>}
-                      {p.tallas && <span className="text-gray-500 text-xs">Tallas: {p.tallas}</span>}
-                    </div>
+                {categorias.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No tienes categorias aun</p>
+                ) : (
+                  <div className="space-y-2">
+                    {categorias.map(c => (
+                      <div key={c.id} className="flex justify-between items-center bg-gray-800 rounded-lg px-3 py-2">
+                        <span className="text-white text-sm">{c.nombre}</span>
+                        <button onClick={() => eliminarCategoria(c.id)} className="text-red-400 hover:text-red-300 text-xs">✕</button>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button onClick={() => iniciarEdicion(p)}
-                      className="text-blue-400 hover:text-blue-300 text-sm border border-blue-900 px-3 py-1.5 rounded-lg transition">
-                      Editar
-                    </button>
-                    <button onClick={() => eliminar(p.id)}
-                      className="text-red-400 hover:text-red-300 text-sm border border-red-900 px-3 py-1.5 rounded-lg transition">
-                      Eliminar
-                    </button>
-                  </div>
+                )}
+              </div>
+
+              <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 space-y-4">
+                <h2 className="text-white font-bold text-lg">🏷️ Marcas</h2>
+                <div className="flex gap-2">
+                  <input placeholder="Nueva marca" value={nuevaMarca} onChange={e => setNuevaMarca(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), crearMarca())}
+                    className="flex-1 bg-gray-800 border border-gray-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-500" />
+                  <button onClick={crearMarca} disabled={cargando}
+                    className="bg-white text-black font-bold px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition disabled:opacity-50">
+                    +
+                  </button>
                 </div>
-              ))}
+                {marcas.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No tienes marcas aun</p>
+                ) : (
+                  <div className="space-y-2">
+                    {marcas.map(m => (
+                      <div key={m.id} className="flex justify-between items-center bg-gray-800 rounded-lg px-3 py-2">
+                        <span className="text-white text-sm">{m.nombre}</span>
+                        <button onClick={() => eliminarMarca(m.id)} className="text-red-400 hover:text-red-300 text-xs">✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
-  </div>
-      </div>
+
+          {mostrarConfig && (
+            <form onSubmit={guardarConfig} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+              <h2 className="text-white font-bold text-lg">⚙️ Configuracion de mi tienda</h2>
+              <input placeholder="Nombre de la tienda" value={config.nombre} onChange={e => setConfig({ ...config, nombre: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+              <input placeholder="Numero WhatsApp (ej: 573001234567)" value={config.whatsapp} onChange={e => setConfig({ ...config, whatsapp: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+              <textarea placeholder="Descripcion de la tienda" value={config.descripcion_tienda} onChange={e => setConfig({ ...config, descripcion_tienda: e.target.value })}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={2} />
+              <div className="flex items-center gap-4">
+                <label className="text-gray-400 text-sm">Color principal:</label>
+                <input type="color" value={config.color} onChange={e => setConfig({ ...config, color: e.target.value })}
+                  className="w-12 h-10 rounded cursor-pointer border border-gray-700 bg-transparent" />
+                <span className="text-gray-500 text-sm">{config.color}</span>
+              </div>
+              <div>
+                <label className="text-gray-400 text-sm block mb-2">Logo de la tienda</label>
+                <input type="file" accept="image/*" onChange={e => setLogoConfig(e.target.files?.[0] || null)} className="text-gray-400 text-sm" />
+              </div>
+              {mensajeConfig && <p className="text-green-400 text-sm">{mensajeConfig}</p>}
+              <button type="submit" disabled={cargando}
+                className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
+                {cargando ? 'Guardando...' : 'Guardar configuracion'}
+              </button>
+            </form>
+          )}
+
+          {mostrarForm && (
+            <form onSubmit={agregarProducto} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+              <h2 className="text-white font-bold text-lg">Nuevo producto</h2>
+              <input placeholder="Nombre *" value={nombre} onChange={e => setNombre(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
+              <textarea placeholder="Descripcion" value={descripcion} onChange={e => setDescripcion(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500 resize-none" rows={3} />
+              <input placeholder="Precio *" type="number" value={precio} onChange={e => setPrecio(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
+              <div className="grid grid-cols-2 gap-3">
+                <select value={categoriaId} onChange={e => setCategoriaId(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500">
+                  <option value="">📂 Categoria</option>
+                  {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                </select>
+                <select value={marcaId} onChange={e => setMarcaId(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500">
+                  <option value="">🏷️ Marca</option>
+                  {marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                </select>
+              </div>
+              <input placeholder="Colores (separados por coma)" value={colores} onChange={e => setColores(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+              <input placeholder="Tallas (separadas por coma)" value={tallas} onChange={e => setTallas(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+              <div>
+                <label className="text-gray-400 text-sm block mb-2">Imagen del producto</label>
+                <input type="file" accept="image/*" onChange={e => setImagen(e.target.files?.[0] || null)}
+                  className="text-gray-400 text-sm" />
+              </div>
+              <button type="submit" disabled={cargando}
+                className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
+                {cargando ? 'Guardando...' : 'Guardar producto'}
+              </button>
+            </form>
+          )}
+
+          {mostrarListaProductos && (
+            <div>
+              <h2 className="text-white font-bold text-lg mb-4">Mis productos ({productos.length})</h2>
+              {productos.length === 0 ? (
+                <p className="text-gray-500 text-center py-12">No tienes productos aun</p>
+              ) : (
+                <div className="space-y-3">
+                  {productos.map(p => (
+                    <div key={p.id} className="bg-gray-900 rounded-2xl border border-gray-800 p-4 flex gap-4 items-center">
+                      {p.imagen ? (
+                        <img src={p.imagen} alt={p.nombre} className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <span className="text-2xl">📦</span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold">{p.nombre}</p>
+                        <p className="text-gray-400 text-sm">{Number(p.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {p.categoria_nombre && (
+                            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">📂 {p.categoria_nombre}</span>
+                          )}
+                          {p.marca_nombre && (
+                            <span className="text-xs bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full">🏷️ {p.marca_nombre}</span>
+                          )}
+                          {p.colores && <span className="text-gray-500 text-xs">Colores: {p.colores}</span>}
+                          {p.tallas && <span className="text-gray-500 text-xs">Tallas: {p.tallas}</span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button onClick={() => iniciarEdicion(p)}
+                          className="text-blue-400 hover:text-blue-300 text-sm border border-blue-900 px-3 py-1.5 rounded-lg transition">
+                          Editar
+                        </button>
+                        <button onClick={() => eliminar(p.id)}
+                          className="text-red-400 hover:text-red-300 text-sm border border-red-900 px-3 py-1.5 rounded-lg transition">
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   )
