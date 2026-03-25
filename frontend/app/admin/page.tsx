@@ -36,22 +36,22 @@ export default function AdminPage() {
   const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
   const [mostrarListaProductos, setMostrarListaProductos] = useState(false)
 
-  useEffect(() => {
+useEffect(() => {
     const t = localStorage.getItem('admin_token')
-    const a = localStorage.getItem('admin')
     if (t) {
-      try {
-        const payload = JSON.parse(atob(t.split('.')[1]))
-        const adminData = a ? JSON.parse(a) : null
-        if (adminData && adminData.id === payload.id) {
-          setAdminInfo(adminData)
-        } else {
-          localStorage.removeItem('admin')
-        }
-      } catch {}
       setToken(t)
-      cargarProductos(t)
+
+      // Cargar del localStorage para mostrar rápido
+      const a = localStorage.getItem('admin')
+      if (a) {
+        try {
+          setAdminInfo(JSON.parse(a))
+        } catch {}
+      }
+
+      // Actualizar desde el servidor
       cargarConfig(t)
+      cargarProductos(t)
       cargarCategorias(t)
       cargarMarcas(t)
     }
@@ -226,7 +226,7 @@ export default function AdminPage() {
     setCargando(false)
   }
 
-  async function cargarConfig(t: string) {
+async function cargarConfig(t: string) {
     const res = await fetch(`${API}/api/tienda/configuracion`, {
       headers: { Authorization: `Bearer ${t}` }
     })
@@ -239,6 +239,14 @@ export default function AdminPage() {
         color: data.color || '#ffffff',
         descripcion_tienda: data.descripcion_tienda || ''
       })
+      // Actualizar adminInfo con datos frescos del servidor
+      setAdminInfo((prev: any) => ({
+        ...prev,
+        id: data.id,
+        nombre: data.nombre,
+        rol: data.rol,
+        plan: data.plan
+      }))
     }
   }
 
