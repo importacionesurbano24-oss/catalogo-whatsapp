@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 
 const API = process.env.NEXT_PUBLIC_API_URL || ''
@@ -399,20 +400,36 @@ function slugSeguro() {
           </button>
 <button
   onClick={() => {
-    console.log('CONFIG ACTUAL:', config)
+    // 1. Intentamos sacar el slug directamente de la info del admin logueado
+    let slugTienda = '';
 
-    const s = slugSeguro()
-
-    console.log('SLUG FINAL:', s)
-
-    if (!s) {
-      alert('Primero configura el nombre o slug de tu tienda en Configuración')
-      return
+    if (adminInfo && adminInfo.nombre) {
+      // Si tenemos la info del admin, usamos su nombre y lo limpiamos (quitamos espacios, acentos, etc.)
+      slugTienda = adminInfo.nombre
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+    } 
+    // 2. Si por alguna razón adminInfo no está, usamos la configuración como plan B
+    else if (config.slug || config.nombre) {
+       slugTienda = slugSeguro();
     }
 
-    window.open(`/tienda/${s}`, '_blank')
+    console.log('SLUG GENERADO PARA LA TIENDA:', slugTienda);
+
+    if (!slugTienda) {
+      alert('Error: No se pudo identificar tu tienda. Por favor, vuelve a iniciar sesión o verifica tu configuración.');
+      return;
+    }
+
+    // 3. Abrimos la tienda correcta
+    window.open(`/tienda/${slugTienda}`, '_blank');
   }}
-  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition"
+  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition w-full text-left"
 >
   👁️ Ver Catálogo
 </button>
