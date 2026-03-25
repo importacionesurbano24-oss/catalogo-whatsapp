@@ -396,31 +396,7 @@ export default function AdminPage() {
           <button onClick={() => { setMostrarConfig(true); setMostrarCatMarcas(false); setMostrarListaProductos(false) }}
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
-          </button>
-          <button
-            onClick={() => {
-              let slugTienda = '';
-              if (adminInfo && adminInfo.nombre) {
-                slugTienda = adminInfo.nombre
-                  .trim()
-                  .toLowerCase()
-                  .normalize('NFD')
-                  .replace(/[\u0300-\u036f]/g, '')
-                  .replace(/[^a-z0-9\s-]/g, '')
-                  .replace(/\s+/g, '-')
-                  .replace(/-+/g, '-');
-              } else if (config.slug || config.nombre) {
-                slugTienda = slugSeguro();
-              }
-              if (!slugTienda) {
-                alert('Error: No pudimos identificar tu tienda.');
-                return;
-              }
-              window.location.href = `/tienda/${slugTienda}`;
-            }}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-400 hover:text-white hover:bg-gray-800 transition w-full text-left"
-          >
-            👁️ Ver Catálogo
+         
           </button>
           <button
             onClick={() => {
