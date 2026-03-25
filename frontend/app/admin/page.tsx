@@ -40,13 +40,21 @@ export default function AdminPage() {
     const t = localStorage.getItem('admin_token')
     const a = localStorage.getItem('admin')
     if (t) {
+      try {
+        const payload = JSON.parse(atob(t.split('.')[1]))
+        const adminData = a ? JSON.parse(a) : null
+        if (adminData && adminData.id === payload.id) {
+          setAdminInfo(adminData)
+        } else {
+          localStorage.removeItem('admin')
+        }
+      } catch {}
       setToken(t)
       cargarProductos(t)
       cargarConfig(t)
       cargarCategorias(t)
       cargarMarcas(t)
     }
-    if (a) { setAdminInfo(JSON.parse(a)) }
   }, [])
 
   async function login(e: any) {
