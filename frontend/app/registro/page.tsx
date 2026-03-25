@@ -86,7 +86,7 @@ export default function Registro() {
           </button>
 
           <p className="text-center text-gray-600 text-sm">
-            ¿Ya tienes cuenta? <a href="/admin" className="text-white underline">Ir al admin</a>
+            ¿Ya tienes cuenta? <a href="/admin" onClick={() => { localStorage.removeItem('admin_token'); localStorage.removeItem('token'); localStorage.removeItem('admin') }} className="text-white underline">Ir al admin</a>
           </p>
         </form>
       </div>
