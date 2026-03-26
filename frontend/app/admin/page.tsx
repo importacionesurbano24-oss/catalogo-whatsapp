@@ -373,27 +373,12 @@ export default function AdminPage() {
           {/* BOTON DE VER TIENDA YA CORREGIDO */}
           <button
             onClick={() => {
-              let slugTienda = '';
-              if (adminInfo && adminInfo.nombre) {
-                slugTienda = adminInfo.nombre
-                  .trim()
-                  .toLowerCase()
-                  .normalize('NFD')
-                  .replace(/[\u0300-\u036f]/g, '')
-                  .replace(/[^a-z0-9\s-]/g, '')
-                  .replace(/\s+/g, '-')
-                  .replace(/-+/g, '-');
-              } else if (config.slug || config.nombre) {
-                 slugTienda = slugSeguro();
+              const s = config.slug || slugSeguro()
+              if (!s) {
+                alert('Primero configura el nombre de tu tienda en Configuración')
+                return
               }
-
-              if (!slugTienda) {
-                alert('Error: No pudimos identificar tu tienda. Inicia sesión nuevamente.');
-                return;
-              }
-
-              window.open(`/tienda/${slugTienda}`, '_blank');
-              setMenuAbierto(false);
+              window.location.href = `/tienda/${s}`
             }}
             className="flex items-center gap-3 text-green-400 hover:text-green-300 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             🏪 Ver Tienda
