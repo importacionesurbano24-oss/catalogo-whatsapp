@@ -298,11 +298,11 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-black">
       {/* BOTON HAMBURGUESA - solo en móvil */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-gray-950 border-b border-gray-800 px-4 py-3 flex justify-between items-center z-50">
-        <h1 className="text-white font-bold text-lg">Panel Admin</h1>
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-gray-950 border-b border-gray-800 px-4 py-3 flex justify-start gap-4 items-center z-50">
         <button onClick={() => setMenuAbierto(!menuAbierto)} className="text-white text-2xl">
           {menuAbierto ? '✕' : '☰'}
         </button>
+        <h1 className="text-white font-bold text-lg">Panel Admin</h1>
       </div>
 
       {/* OVERLAY - solo en móvil cuando el menú está abierto */}
