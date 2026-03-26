@@ -501,12 +501,26 @@ export default function AdminPage() {
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
               <input placeholder="Tallas (separadas por coma)" value={tallas} onChange={e => setTallas(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-             <div>
+            <div>
                 <label className="text-gray-400 text-sm block mb-2">Imágenes del producto (máx. 10)</label>
+                {imagenes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {imagenes.map((img, i) => (
+                      <div key={i} className="relative">
+                        <img src={URL.createObjectURL(img)} alt="preview" className="w-20 h-20 object-cover rounded-xl" />
+                        <button type="button" onClick={() => setImagenes(imagenes.filter((_, idx) => idx !== i))}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">✕</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition">
                   <span className="text-gray-400 text-2xl">📷</span>
-                  <span className="text-gray-500 text-xs mt-1">{imagenes.length > 0 ? `${imagenes.length} imagen(es) seleccionada(s)` : 'Toca para subir imágenes'}</span>
-                  <input type="file" accept="image/*" multiple onChange={e => setImagenes(Array.from(e.target.files || []))} className="hidden" />
+                  <span className="text-gray-500 text-xs mt-1">{imagenes.length > 0 ? '+ Agregar más imágenes' : 'Toca para subir imágenes'}</span>
+                  <input type="file" accept="image/*" multiple onChange={e => {
+                    const nuevas = Array.from(e.target.files || [])
+                    setImagenes([...imagenes, ...nuevas])
+                  }} className="hidden" />
                 </label>
               </div>
               <button type="submit" disabled={cargando}
