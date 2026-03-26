@@ -264,7 +264,11 @@ export default function AdminPage() {
           <div>
             {editando.imagen && <img src={editando.imagen} alt="actual" className="w-20 h-20 object-cover rounded-xl mb-2" />}
             <label className="text-gray-400 text-sm block mb-2">Nueva imagen (opcional)</label>
-            <input type="file" accept="image/*" onChange={e => setImagenEditar(e.target.files?.[0] || null)} className="text-gray-400 text-sm" />
+            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition">
+              <span className="text-gray-400 text-2xl">📷</span>
+              <span className="text-gray-500 text-xs mt-1">{imagenEditar ? imagenEditar.name : 'Toca para cambiar imagen'}</span>
+              <input type="file" accept="image/*" onChange={e => setImagenEditar(e.target.files?.[0] || null)} className="hidden" />
+            </label>
           </div>
           <div className="flex gap-3">
             <button type="submit" disabled={cargando} className="flex-1 bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
@@ -473,7 +477,11 @@ export default function AdminPage() {
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
               <div>
                 <label className="text-gray-400 text-sm block mb-2">Imagen del producto</label>
-                <input type="file" accept="image/*" onChange={e => setImagen(e.target.files?.[0] || null)} className="text-gray-400 text-sm" />
+                <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition">
+                  <span className="text-gray-400 text-2xl">📷</span>
+                  <span className="text-gray-500 text-xs mt-1">{imagen ? imagen.name : 'Toca para subir imagen'}</span>
+                  <input type="file" accept="image/*" onChange={e => setImagen(e.target.files?.[0] || null)} className="hidden" />
+                </label>
               </div>
               <button type="submit" disabled={cargando}
                 className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
