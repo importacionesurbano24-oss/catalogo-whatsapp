@@ -12,6 +12,7 @@ cloudinary.config({
 })
 
 const upload = multer({ storage: multer.memoryStorage() })
+
 // Función para subir imagen a Cloudinary
 async function subirImagen(file) {
   const resultado = await new Promise((resolve, reject) => {
@@ -67,7 +68,6 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
       )
       producto.imagenes = imagenes.rows
     }
-
 
     res.json(result.rows)
   } catch (error) {
@@ -178,6 +178,11 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
     result.rows[0].imagenes = imagenes.rows
 
     res.json(result.rows[0])
+
+  } catch (error) {
+    // ---- AQUÍ ESTABA EL ERROR: FALTABA ESTE BLOQUE CATCH ----
+    console.error('Error al editar producto:', error.message)
+    res.status(500).json({ error: 'Error al editar producto: ' + error.message })
   }
 })
 

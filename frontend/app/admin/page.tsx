@@ -23,7 +23,7 @@ export default function AdminPage() {
   const [categoriaId, setCategoriaId] = useState('')
   const [marcaId, setMarcaId] = useState('')
   const [editando, setEditando] = useState<any | null>(null)
-  const [imagenEditar, setImagenEditar] = useState<File | null>(null)
+  const [imagenEditar, setImagenEditar] = useState<any>(null) // Cambiado a any para soportar FileList
   const [adminInfo, setAdminInfo] = useState<any>(null)
   const [mostrarConfig, setMostrarConfig] = useState(false)
   const [config, setConfig] = useState({ nombre: '', slug: '', whatsapp: '', color: '#ffffff', descripcion_tienda: '' })
@@ -369,15 +369,36 @@ export default function AdminPage() {
             className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             ⚙️ Configuración
           </button>
+          
+          {/* BOTON DE VER TIENDA YA CORREGIDO */}
           <button
             onClick={() => {
-              const s = slugSeguro()
-              if (!s) { alert('Primero configura el nombre de tu tienda en Configuración'); return }
-              window.location.href = `/tienda/${s}`
+              let slugTienda = '';
+              if (adminInfo && adminInfo.nombre) {
+                slugTienda = adminInfo.nombre
+                  .trim()
+                  .toLowerCase()
+                  .normalize('NFD')
+                  .replace(/[\u0300-\u036f]/g, '')
+                  .replace(/[^a-z0-9\s-]/g, '')
+                  .replace(/\s+/g, '-')
+                  .replace(/-+/g, '-');
+              } else if (config.slug || config.nombre) {
+                 slugTienda = slugSeguro();
+              }
+
+              if (!slugTienda) {
+                alert('Error: No pudimos identificar tu tienda. Inicia sesión nuevamente.');
+                return;
+              }
+
+              window.open(`/tienda/${slugTienda}`, '_blank');
+              setMenuAbierto(false);
             }}
             className="flex items-center gap-3 text-green-400 hover:text-green-300 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             🏪 Ver Tienda
           </button>
+
           {adminInfo?.rol === 'superadmin' && (
             <a href="/superadmin" className="flex items-center gap-3 text-yellow-500 hover:text-yellow-400 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition">
               👑 Superadmin
