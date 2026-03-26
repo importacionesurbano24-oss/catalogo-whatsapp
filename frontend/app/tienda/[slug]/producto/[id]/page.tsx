@@ -15,6 +15,7 @@ export default function ProductoDetalle() {
   const [colorSel, setColorSel] = useState('')
   const [tallaSel, setTallaSel] = useState('')
   const [agregado, setAgregado] = useState(false)
+  const [imagenActiva, setImagenActiva] = useState('')
 
   useEffect(() => {
     fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
@@ -68,11 +69,26 @@ export default function ProductoDetalle() {
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden aspect-square flex items-center justify-center">
-            {producto.imagen ? (
-              <img src={producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-4" />
-            ) : (
-              <span className="text-gray-600 text-8xl">📦</span>
+          <div>
+            <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden aspect-square flex items-center justify-center">
+              {producto.imagen ? (
+                <img src={imagenActiva || producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-4" />
+              ) : (
+                <span className="text-gray-600 text-8xl">📦</span>
+              )}
+            </div>
+            {producto.imagenes && producto.imagenes.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto">
+                {producto.imagenes.map((img: any) => (
+                  <img
+                    key={img.id}
+                    src={img.imagen_url}
+                    alt="producto"
+                    onClick={() => setImagenActiva(img.imagen_url)}
+                    className={`w-16 h-16 object-cover rounded-lg cursor-pointer border-2 flex-shrink-0 ${imagenActiva === img.imagen_url ? 'border-white' : 'border-gray-700'}`}
+                  />
+                ))}
+              </div>
             )}
           </div>
 

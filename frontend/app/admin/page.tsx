@@ -19,7 +19,7 @@ export default function AdminPage() {
   const [precioDescuento, setPrecioDescuento] = useState('')
   const [colores, setColores] = useState('')
   const [tallas, setTallas] = useState('')
-  const [imagen, setImagen] = useState<File | null>(null)
+  const [imagenes, setImagenes] = useState<File[]>([])
   const [categoriaId, setCategoriaId] = useState('')
   const [marcaId, setMarcaId] = useState('')
   const [editando, setEditando] = useState<any | null>(null)
@@ -149,11 +149,11 @@ export default function AdminPage() {
     form.append('tallas', tallas)
     if (categoriaId) form.append('categoria_id', categoriaId)
     if (marcaId) form.append('marca_id', marcaId)
-    if (imagen) form.append('imagen', imagen)
+    imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
       setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento('')
-      setColores(''); setTallas(''); setImagen(null)
+      setColores(''); setTallas(''); setImagenes([])
       setCategoriaId(''); setMarcaId('')
       setMostrarForm(false)
       cargarProductos(token!)
@@ -168,7 +168,7 @@ export default function AdminPage() {
   }
 
   function iniciarEdicion(p: any) {
-    setEditando({ ...p, categoria_id: p.categoria_id || '', marca_id: p.marca_id || '', precio_descuento: p.precio_descuento || '' })
+    setEditando({ ...p, categoria_id: p.categoria_id || '', marca_id: p.marca_id || '', precio_descuento: p.precio_descuento || '', imagenes_eliminar: [] })
     setImagenEditar(null)
   }
 
@@ -180,11 +180,16 @@ export default function AdminPage() {
     form.append('descripcion', editando.descripcion || '')
     form.append('precio', editando.precio)
     form.append('precio_descuento', editando.precio_descuento || '')
+    if (editando.imagenes_eliminar) form.append('imagenes_eliminar', JSON.stringify(editando.imagenes_eliminar))
     form.append('colores', editando.colores || '')
     form.append('tallas', editando.tallas || '')
     if (editando.categoria_id) form.append('categoria_id', editando.categoria_id)
     if (editando.marca_id) form.append('marca_id', editando.marca_id)
-    if (imagenEditar) form.append('imagen', imagenEditar)
+    if (imagenEditar) {
+      for (let i = 0; i < imagenEditar.length; i++) {
+        form.append('imagenes', imagenEditar[i])
+      }
+    }
     const res = await fetch(`${API}/api/productos/${editando.id}`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) { setEditando(null); cargarProductos(token!) }
     setCargando(false)
@@ -262,12 +267,27 @@ export default function AdminPage() {
           <input placeholder="Tallas (separadas por coma)" value={editando.tallas || ''} onChange={e => setEditando({ ...editando, tallas: e.target.value })}
             className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
           <div>
-            {editando.imagen && <img src={editando.imagen} alt="actual" className="w-20 h-20 object-cover rounded-xl mb-2" />}
-            <label className="text-gray-400 text-sm block mb-2">Nueva imagen (opcional)</label>
+            {editando.imagenes && editando.imagenes.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {editando.imagenes.map((img: any) => (
+                  <div key={img.id} className="relative">
+                    <img src={img.imagen_url} alt="producto" className="w-20 h-20 object-cover rounded-xl" />
+                    <button type="button" onClick={() => {
+                      const eliminar = editando.imagenes_eliminar || []
+                      setEditando({ ...editando, imagenes: editando.imagenes.filter((i: any) => i.id !== img.id), imagenes_eliminar: [...eliminar, img.id] })
+                    }} className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">✕</button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!editando.imagenes?.length && editando.imagen && (
+              <img src={editando.imagen} alt="actual" className="w-20 h-20 object-cover rounded-xl mb-2" />
+            )}
+            <label className="text-gray-400 text-sm block mb-2">Agregar imágenes</label>
             <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition">
               <span className="text-gray-400 text-2xl">📷</span>
-              <span className="text-gray-500 text-xs mt-1">{imagenEditar ? imagenEditar.name : 'Toca para cambiar imagen'}</span>
-              <input type="file" accept="image/*" onChange={e => setImagenEditar(e.target.files?.[0] || null)} className="hidden" />
+              <span className="text-gray-500 text-xs mt-1">{imagenEditar ? `${imagenEditar.length || 1} nueva(s)` : 'Toca para agregar imágenes'}</span>
+              <input type="file" accept="image/*" multiple onChange={e => setImagenEditar(e.target.files)} className="hidden" />
             </label>
           </div>
           <div className="flex gap-3">
@@ -475,12 +495,12 @@ export default function AdminPage() {
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
               <input placeholder="Tallas (separadas por coma)" value={tallas} onChange={e => setTallas(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-              <div>
-                <label className="text-gray-400 text-sm block mb-2">Imagen del producto</label>
+             <div>
+                <label className="text-gray-400 text-sm block mb-2">Imágenes del producto (máx. 10)</label>
                 <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition">
                   <span className="text-gray-400 text-2xl">📷</span>
-                  <span className="text-gray-500 text-xs mt-1">{imagen ? imagen.name : 'Toca para subir imagen'}</span>
-                  <input type="file" accept="image/*" onChange={e => setImagen(e.target.files?.[0] || null)} className="hidden" />
+                  <span className="text-gray-500 text-xs mt-1">{imagenes.length > 0 ? `${imagenes.length} imagen(es) seleccionada(s)` : 'Toca para subir imágenes'}</span>
+                  <input type="file" accept="image/*" multiple onChange={e => setImagenes(Array.from(e.target.files || []))} className="hidden" />
                 </label>
               </div>
               <button type="submit" disabled={cargando}
