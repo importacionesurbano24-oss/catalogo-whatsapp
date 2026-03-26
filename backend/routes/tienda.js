@@ -80,6 +80,14 @@ router.get('/:slug', async (req, res) => {
       'SELECT * FROM productos WHERE admin_id = $1',
       [tienda.rows[0].id]
     )
+    // Agregar imágenes a cada producto
+    for (let producto of productos.rows) {
+      const imagenes = await pool.query(
+        'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
+        [producto.id]
+      )
+      producto.imagenes = imagenes.rows
+    }
     const { password, ...tiendaSegura } = tienda.rows[0]
     res.json({ tienda: tiendaSegura, productos: productos.rows })
   } catch (error) {
