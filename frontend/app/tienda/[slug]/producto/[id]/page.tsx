@@ -16,6 +16,18 @@ export default function ProductoDetalle() {
   const [tallaSel, setTallaSel] = useState('')
   const [agregado, setAgregado] = useState(false)
   const [imagenActiva, setImagenActiva] = useState('')
+  // Cargar producto desde localStorage (instantáneo)
+  useEffect(() => {
+    const cached = localStorage.getItem('producto_detalle')
+    if (cached) {
+      try {
+        const p = JSON.parse(cached)
+        if (String(p.id) === String(id)) {
+          setProducto(p)
+        }
+      } catch {}
+    }
+  }, [id])
 
   useEffect(() => {
     // Cargar tienda

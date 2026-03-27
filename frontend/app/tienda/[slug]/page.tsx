@@ -19,7 +19,7 @@ function ProductoCard({ producto, onAgregar, slug }: any) {
 
   return (
     <div className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-gray-600 transition-all duration-300 flex flex-col">
-      <a href={`/tienda/${slug}/producto/${producto.id}`} className="relative w-full aspect-square bg-gray-800 overflow-hidden block cursor-pointer">
+      <a href={`/tienda/${slug}/producto/${producto.id}`} onClick={() => localStorage.setItem('producto_detalle', JSON.stringify(producto))} className="relative w-full aspect-square bg-gray-800 overflow-hidden block cursor-pointer">
         {producto.imagen ? (
           <img src={producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-2" />
         ) : (
