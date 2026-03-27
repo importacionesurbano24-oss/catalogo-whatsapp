@@ -63,7 +63,6 @@ router.post('/login', async (req, res) => {
 })
 // Olvidé mi contraseña - enviar código por email
 const { Resend } = require('resend')
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 router.post('/recuperar', async (req, res) => {
   try {
@@ -85,6 +84,7 @@ router.post('/recuperar', async (req, res) => {
     )
 
     // Enviar email
+    const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: email,
