@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken')
 // Registro
 router.post('/registro', async (req, res) => {
   try {
-    const { nombre, email, password } = req.body
+    const { nombre, email, password, whatsapp } = req.body
     
     // Verificar si el email ya existe
     const existe = await pool.query('SELECT * FROM admins WHERE email = $1', [email])
@@ -20,8 +20,8 @@ router.post('/registro', async (req, res) => {
 
     // Crear admin
     const result = await pool.query(
-      'INSERT INTO admins (nombre, email, password, rol, plan) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [nombre, email, passwordEncriptado, 'admin', 'gratis']
+      'INSERT INTO admins (nombre, email, password, whatsapp, rol, plan) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [nombre, email, passwordEncriptado, whatsapp || null, 'admin', 'gratis']
     )
 
     res.json({ mensaje: 'Cuenta creada exitosamente', admin: result.rows[0] })

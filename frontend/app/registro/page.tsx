@@ -2,7 +2,7 @@
 import { useState } from 'react'
 
 export default function Registro() {
-  const [form, setForm] = useState({ nombre: '', email: '', password: '' })
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', whatsapp: '' })
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -24,7 +24,7 @@ export default function Registro() {
         setError(data.error || 'Error al registrarse')
       } else {
         setMensaje('¡Cuenta creada! Ya puedes iniciar sesión en /admin')
-        setForm({ nombre: '', email: '', password: '' })
+        setForm({ nombre: '', email: '', password: '', whatsapp: '' })
       }
     } catch {
       setError('No se pudo conectar al servidor')
@@ -71,6 +71,17 @@ export default function Registro() {
               required
               className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
               placeholder="Mínimo 6 caracteres"
+            />
+          </div>
+          <div>
+            <label className="text-gray-400 text-sm">Número celular / WhatsApp</label>
+            <input
+              type="tel"
+              value={form.whatsapp}
+              onChange={e => setForm({ ...form, whatsapp: e.target.value })}
+              required
+              className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
+              placeholder="Ej: 573001234567"
             />
           </div>
 
