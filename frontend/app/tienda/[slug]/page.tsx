@@ -64,7 +64,13 @@ export default function TiendaPage() {
   const slug = params.slug
   const [tienda, setTienda] = useState<any>(null)
   const [productos, setProductos] = useState<any[]>([])
-  const [carrito, setCarrito] = useState<any[]>([])
+  const [carrito, setCarrito] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('carrito_' + slug)
+      return saved ? JSON.parse(saved) : []
+    }
+    return []
+  })
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
 
   useEffect(() => {
@@ -82,13 +88,16 @@ export default function TiendaPage() {
   }, [slug])
 
   function agregarAlCarrito(producto: any, color: string, talla: string) {
-    setCarrito([...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }])
+    const nuevo = [...carrito, { ...producto, colorSeleccionado: color, tallaSeleccionada: talla }]
+    setCarrito(nuevo)
+    localStorage.setItem('carrito_' + slug, JSON.stringify(nuevo))
   }
 
   function eliminarDelCarrito(index: number) {
-    setCarrito(carrito.filter((_, i) => i !== index))
+    const nuevo = carrito.filter((_, i) => i !== index)
+    setCarrito(nuevo)
+    localStorage.setItem('carrito_' + slug, JSON.stringify(nuevo))
   }
-
   function totalCarrito() {
     return carrito.reduce((sum, p) => sum + Number(p.precio_descuento || p.precio), 0)
   }
