@@ -33,26 +33,7 @@ function ProductoCard({ producto, onAgregar, slug }: any) {
         {producto.descripcion && (
           <p className="text-gray-500 text-sm mt-1 line-clamp-2">{producto.descripcion}</p>
         )}
-        <div className="mt-3 space-y-2">
-          {producto.colores && producto.colores.trim() !== '' && (
-            <select value={colorSel} onChange={e => setColorSel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
-              <option value="">🎨 Elegir color</option>
-              {producto.colores.split(',').map((color: string, i: number) => (
-                <option key={i} value={color.trim()}>{color.trim()}</option>
-              ))}
-            </select>
-          )}
-          {producto.tallas && producto.tallas.trim() !== '' && (
-            <select value={tallaSel} onChange={e => setTallaSel(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg p-2 text-sm focus:outline-none focus:border-gray-500">
-              <option value="">📏 Elegir talla</option>
-              {producto.tallas.split(',').map((talla: string, i: number) => (
-                <option key={i} value={talla.trim()}>{talla.trim()}</option>
-              ))}
-            </select>
-          )}
-        </div>
+        
         <div className="mt-auto pt-4">
           <p className="text-white font-bold text-xl">
             {producto.precio_descuento ? (
