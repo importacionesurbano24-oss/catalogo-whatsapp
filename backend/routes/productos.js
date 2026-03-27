@@ -185,6 +185,34 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
     res.status(500).json({ error: 'Error al editar producto: ' + error.message })
   }
 })
+// GET producto individual por ID (público)
+router.get('/detalle/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const result = await pool.query(`
+      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre
+      FROM productos p
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+      LEFT JOIN marcas m ON p.marca_id = m.id
+      WHERE p.id = $1
+    `, [id])
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Producto no encontrado' })
+    }
+
+    const producto = result.rows[0]
+    const imagenes = await pool.query(
+      'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
+      [id]
+    )
+    producto.imagenes = imagenes.rows
+
+    res.json(producto)
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener producto' })
+  }
+})
 
 // DELETE eliminar producto
 router.delete('/:id', verificarToken, async (req, res) => {

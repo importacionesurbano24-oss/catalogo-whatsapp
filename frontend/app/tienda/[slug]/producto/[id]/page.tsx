@@ -18,14 +18,19 @@ export default function ProductoDetalle() {
   const [imagenActiva, setImagenActiva] = useState('')
 
   useEffect(() => {
+    // Cargar tienda
     fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
       .then(res => res.json())
       .then(data => {
-        if (data.tienda) {
-          setTienda(data.tienda)
-          const prod = (data.productos || []).find((p: any) => String(p.id) === String(id))
-          setProducto(prod || null)
-        }
+        if (data.tienda) setTienda(data.tienda)
+      })
+      .catch(() => {})
+
+    // Cargar producto individual (más rápido)
+    fetch(`https://catalogo-whatsapp-production.up.railway.app/api/productos/detalle/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && !data.error) setProducto(data)
       })
       .catch(() => {})
   }, [slug, id])
