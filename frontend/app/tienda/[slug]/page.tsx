@@ -73,6 +73,7 @@ export default function TiendaPage() {
   })
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
   const [busqueda, setBusqueda] = useState('')
+  const [categoriaFiltro, setCategoriaFiltro] = useState('')
 
   useEffect(() => {
     fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
@@ -174,7 +175,7 @@ export default function TiendaPage() {
 
       {/* BUSCADOR Y CATALOGO */}
       <div className="px-6 py-8">
-        <div className="mb-6">
+        <div className="mb-6 space-y-3">
           <input
             type="text"
             value={busqueda}
@@ -182,12 +183,26 @@ export default function TiendaPage() {
             placeholder="🔍 Buscar productos..."
             className="w-full bg-gray-900 border border-gray-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-600 text-sm"
           />
+          {[...new Set(productos.map(p => p.categoria_nombre).filter(Boolean))].length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => setCategoriaFiltro('')}
+                className={`px-4 py-1.5 rounded-full text-sm transition ${categoriaFiltro === '' ? 'bg-white text-black font-bold' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
+                Todos
+              </button>
+              {[...new Set(productos.map(p => p.categoria_nombre).filter(Boolean))].map((cat: string) => (
+                <button key={cat} onClick={() => setCategoriaFiltro(cat)}
+                  className={`px-4 py-1.5 rounded-full text-sm transition ${categoriaFiltro === cat ? 'bg-white text-black font-bold' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         {productos.length === 0 ? (
           <p className="text-gray-500 text-center py-20">Esta tienda aún no tiene productos</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {productos.filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase())).map(producto => (
+            {productos.filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase()) && (categoriaFiltro === '' || p.categoria_nombre === categoriaFiltro)).map(producto => (
               <ProductoCard key={producto.id} producto={producto} onAgregar={agregarAlCarrito} slug={slug} />
             ))}
           </div>
