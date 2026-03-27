@@ -3,12 +3,21 @@ import { useState } from 'react'
 
 export default function Registro() {
   const [form, setForm] = useState({ nombre: '', email: '', password: '', whatsapp: '' })
+  const [confirmarPassword, setConfirmarPassword] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
   const [cargando, setCargando] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (form.password !== confirmarPassword) {
+      setError('Las contraseñas no coinciden')
+      return
+    }
+    if (form.password.length < 6) {
+      setError('La contraseña debe tener mínimo 6 caracteres')
+      return
+    }
     setCargando(true)
     setMensaje('')
     setError('')
@@ -71,6 +80,17 @@ export default function Registro() {
               required
               className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
               placeholder="Mínimo 6 caracteres"
+            />
+          </div>
+          <div>
+            <label className="text-gray-400 text-sm">Confirmar contraseña</label>
+            <input
+              type="password"
+              value={confirmarPassword}
+              onChange={e => setConfirmarPassword(e.target.value)}
+              required
+              className="mt-1 w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-3 focus:outline-none focus:border-gray-500"
+              placeholder="Repite tu contraseña"
             />
           </div>
           <div>
