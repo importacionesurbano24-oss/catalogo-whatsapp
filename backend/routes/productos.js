@@ -49,32 +49,33 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET productos del admin logueado con categoría y marca
+// GET productos del admin logueado optimizado
 router.get('/mis-productos', verificarToken, async (req, res) => {
   try {
-    const adminId = req.admin.id
-    const result = await pool.query(`
-      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre
+    const adminId = req.admin.id;
+    const query = `
+      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
+      COALESCE(
+        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden) ORDER BY pi.orden)
+         FROM producto_imagenes pi 
+         WHERE pi.producto_id = p.id), 
+        '[]'
+      ) AS imagenes
       FROM productos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
       LEFT JOIN marcas m ON p.marca_id = m.id
       WHERE p.admin_id = $1
       ORDER BY p.created_at DESC
-    `, [adminId])
-      // Agregar imágenes adicionales a cada producto
-    for (let producto of result.rows) {
-      const imagenes = await pool.query(
-        'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
-        [producto.id]
-      )
-      producto.imagenes = imagenes.rows
-    }
+    `;
+    
+    const result = await pool.query(query, [adminId]);
+    res.json(result.rows);
 
-    res.json(result.rows)
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener tus productos' })
+    console.error('Error al obtener tus productos:', error);
+    res.status(500).json({ error: 'Error al obtener tus productos' });
   }
-})
+});
 
 // POST crear producto con categoría y marca
 router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) => {
