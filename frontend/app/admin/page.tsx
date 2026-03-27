@@ -378,7 +378,7 @@ export default function AdminPage() {
                 alert('Primero configura el nombre de tu tienda en Configuración')
                 return
               }
-              window.location.href = `/tienda/${s}`
+              window.open(`/tienda/${s}`, '_blank')
             }}
             className="flex items-center gap-3 text-green-400 hover:text-green-300 hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
             🏪 Ver Tienda
