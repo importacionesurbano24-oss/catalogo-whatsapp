@@ -38,6 +38,15 @@ export default function AdminPage() {
   const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
   const [mostrarListaProductos, setMostrarListaProductos] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false)
+  const [tabLogin, setTabLogin] = useState<'login' | 'registro'>('login')
+  const [regNombre, setRegNombre] = useState('')
+  const [regEmail, setRegEmail] = useState('')
+  const [regPassword, setRegPassword] = useState('')
+  const [regConfirmar, setRegConfirmar] = useState('')
+  const [regWhatsapp, setRegWhatsapp] = useState('')
+  const [regError, setRegError] = useState('')
+  const [regMensaje, setRegMensaje] = useState('')
+  const [regCargando, setRegCargando] = useState(false)
 
   useEffect(() => {
     const t = localStorage.getItem('admin_token')
@@ -233,6 +242,39 @@ export default function AdminPage() {
   }
 
   function navegarYCerrarMenu(accion: () => void) {
+    async function registro(e: any) {
+    e.preventDefault()
+    setRegError('')
+    setRegMensaje('')
+    if (regPassword !== regConfirmar) {
+      setRegError('Las contraseñas no coinciden')
+      return
+    }
+    if (regPassword.length < 6) {
+      setRegError('La contraseña debe tener mínimo 6 caracteres')
+      return
+    }
+    setRegCargando(true)
+    try {
+      const res = await fetch(`${API}/api/auth/registro`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: regNombre, email: regEmail, password: regPassword, whatsapp: regWhatsapp })
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setRegError(data.error || 'Error al registrarse')
+      } else {
+        setRegMensaje('¡Cuenta creada! Ahora inicia sesión.')
+        setRegNombre(''); setRegEmail(''); setRegPassword(''); setRegConfirmar(''); setRegWhatsapp('')
+        setTimeout(() => setTabLogin('login'), 2000)
+      }
+    } catch {
+      setRegError('No se pudo conectar al servidor')
+    } finally {
+      setRegCargando(false)
+    }
+  }
     accion()
     setMenuAbierto(false)
   }
@@ -305,19 +347,71 @@ export default function AdminPage() {
 
   if (!token) return (
     <main className="min-h-screen bg-black flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <h1 className="text-white text-2xl font-bold text-center mb-8">Panel Admin</h1>
-        <form onSubmit={login} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
-          <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
-          <input type="password" placeholder="Contrasena" value={password} onChange={e => setPassword(e.target.value)}
-            className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
-          {errorLogin && <p className="text-red-400 text-sm">{errorLogin}</p>}
-          <button type="submit" className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">Ingresar</button>
-          <p className="text-center text-gray-600 text-sm mt-2">
-            <a href="/recuperar" className="text-green-400 hover:text-green-300 underline">¿Olvidaste tu contraseña?</a>
-          </p>
-        </form>
+      <div className="w-full max-w-md">
+        <h1 className="text-white text-2xl font-bold text-center mb-6">Panel Admin</h1>
+        <div className="flex mb-6 bg-gray-900 rounded-xl p-1 border border-gray-800">
+          <button onClick={() => setTabLogin('login')}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition ${tabLogin === 'login' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>
+            Iniciar sesión
+          </button>
+          <button onClick={() => setTabLogin('registro')}
+            className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition ${tabLogin === 'registro' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>
+            Crear cuenta
+          </button>
+        </div>
+
+        {tabLogin === 'login' ? (
+          <form onSubmit={login} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+            <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
+            <input type="password" placeholder="Contraseña" value={password} onChange={e => setPassword(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
+            {errorLogin && <p className="text-red-400 text-sm">{errorLogin}</p>}
+            <button type="submit" className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">Ingresar</button>
+            <p className="text-center text-sm mt-2">
+              <a href="/recuperar" className="text-green-400 hover:text-green-300 underline">¿Olvidaste tu contraseña?</a>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={registro} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
+            <div>
+              <label className="text-gray-400 text-sm">Nombre de tu tienda</label>
+              <input type="text" value={regNombre} onChange={e => setRegNombre(e.target.value)} required
+                className="mt-1 w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+                placeholder="Ej: Importaciones Urbano" />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm">Email</label>
+              <input type="email" value={regEmail} onChange={e => setRegEmail(e.target.value)} required
+                className="mt-1 w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+                placeholder="tucorreo@email.com" />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm">Contraseña</label>
+              <input type="password" value={regPassword} onChange={e => setRegPassword(e.target.value)} required
+                className="mt-1 w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+                placeholder="Mínimo 6 caracteres" />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm">Confirmar contraseña</label>
+              <input type="password" value={regConfirmar} onChange={e => setRegConfirmar(e.target.value)} required
+                className="mt-1 w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+                placeholder="Repite tu contraseña" />
+            </div>
+            <div>
+              <label className="text-gray-400 text-sm">Número celular / WhatsApp</label>
+              <input type="tel" value={regWhatsapp} onChange={e => setRegWhatsapp(e.target.value)} required
+                className="mt-1 w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500"
+                placeholder="Ej: 573001234567" />
+            </div>
+            {regError && <p className="text-red-400 text-sm">{regError}</p>}
+            {regMensaje && <p className="text-green-400 text-sm">{regMensaje}</p>}
+            <button type="submit" disabled={regCargando}
+              className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
+              {regCargando ? 'Creando cuenta...' : 'Crear cuenta'}
+            </button>
+          </form>
+        )}
       </div>
     </main>
   )
