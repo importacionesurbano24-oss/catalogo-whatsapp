@@ -24,29 +24,30 @@ async function subirImagen(file) {
   return resultado.secure_url
 }
 
-// GET todos los productos con categoría y marca (catálogo público)
+// GET todos los productos optimizado (Una sola consulta)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre
+    const query = `
+      SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
+      COALESCE(
+        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden) ORDER BY pi.orden)
+         FROM producto_imagenes pi 
+         WHERE pi.producto_id = p.id), 
+        '[]'
+      ) AS imagenes
       FROM productos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
       LEFT JOIN marcas m ON p.marca_id = m.id
-    `)
-     // Agregar imágenes adicionales a cada producto
-    for (let producto of result.rows) {
-      const imagenes = await pool.query(
-        'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
-        [producto.id]
-      )
-      producto.imagenes = imagenes.rows
-    }
-    res.json(result.rows)
+    `;
+    
+    const result = await pool.query(query);
+    res.json(result.rows);
 
   } catch (error) {
-    res.status(500).json({ error: 'Error al obtener productos' })
+    console.error('Error al obtener productos:', error);
+    res.status(500).json({ error: 'Error al obtener productos' });
   }
-})
+});
 
 // GET productos del admin logueado con categoría y marca
 router.get('/mis-productos', verificarToken, async (req, res) => {
