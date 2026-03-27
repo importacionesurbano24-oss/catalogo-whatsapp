@@ -315,7 +315,7 @@ export default function AdminPage() {
           {errorLogin && <p className="text-red-400 text-sm">{errorLogin}</p>}
           <button type="submit" className="w-full bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition">Ingresar</button>
           <p className="text-center text-gray-600 text-sm mt-2">
-            <a href="/recuperar" className="text-gray-400 hover:text-white underline">¿Olvidaste tu contraseña?</a>
+            <a href="/recuperar" className="text-green-400 hover:text-green-300 underline">¿Olvidaste tu contraseña?</a>
           </p>
         </form>
       </div>
