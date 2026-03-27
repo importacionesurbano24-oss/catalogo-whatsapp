@@ -16,6 +16,7 @@ export default function ProductoDetalle() {
   const [tallaSel, setTallaSel] = useState('')
   const [agregado, setAgregado] = useState(false)
   const [imagenActiva, setImagenActiva] = useState('')
+  const [imagenZoom, setImagenZoom] = useState('')
   // Cargar producto desde localStorage (instantáneo)
   useEffect(() => {
     const cached = localStorage.getItem('producto_detalle')
@@ -89,7 +90,7 @@ export default function ProductoDetalle() {
           <div>
             <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden aspect-square flex items-center justify-center">
               {producto.imagen ? (
-                <img src={imagenActiva || producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-4" />
+                <img src={imagenActiva || producto.imagen} alt={producto.nombre} className="w-full h-full object-contain p-4 cursor-pointer" onClick={() => setImagenZoom(imagenActiva || producto.imagen)} />
               ) : (
                 <span className="text-gray-600 text-8xl">📦</span>
               )}
@@ -186,6 +187,12 @@ export default function ProductoDetalle() {
           </div>
         </div>
       </div>
+      {imagenZoom && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4" onClick={() => setImagenZoom('')}>
+          <button className="absolute top-4 right-4 text-white text-3xl" onClick={() => setImagenZoom('')}>✕</button>
+          <img src={imagenZoom} alt="zoom" className="max-w-full max-h-full object-contain rounded-xl" />
+        </div>
+      )}
     </main>
   )
 }
