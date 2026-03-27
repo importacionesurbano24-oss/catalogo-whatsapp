@@ -147,8 +147,8 @@ export default function AdminPage() {
     form.append('precio_descuento', precioDescuento)
     form.append('colores', colores)
     form.append('tallas', tallas)
-    if (categoriaId) form.append('categoria_id', categoriaId)
-    if (marcaId) form.append('marca_id', marcaId)
+    form.append('categoria_id', categoriaId || '')
+    form.append('marca_id', marcaId || '')
     imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
@@ -183,8 +183,8 @@ export default function AdminPage() {
     if (editando.imagenes_eliminar) form.append('imagenes_eliminar', JSON.stringify(editando.imagenes_eliminar))
     form.append('colores', editando.colores || '')
     form.append('tallas', editando.tallas || '')
-    if (editando.categoria_id) form.append('categoria_id', editando.categoria_id)
-    if (editando.marca_id) form.append('marca_id', editando.marca_id)
+    form.append('categoria_id', editando.categoria_id || '')
+    form.append('marca_id', editando.marca_id || '')
     if (imagenEditar) {
       for (let i = 0; i < imagenEditar.length; i++) {
         form.append('imagenes', imagenEditar[i])
