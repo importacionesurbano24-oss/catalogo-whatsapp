@@ -242,7 +242,11 @@ export default function AdminPage() {
   }
 
   function navegarYCerrarMenu(accion: () => void) {
-    async function registro(e: any) {
+    accion()
+    setMenuAbierto(false)
+  }
+
+  async function registro(e: any) {
     e.preventDefault()
     setRegError('')
     setRegMensaje('')
@@ -275,9 +279,7 @@ export default function AdminPage() {
       setRegCargando(false)
     }
   }
-    accion()
-    setMenuAbierto(false)
-  }
+  
 
   if (editando) return (
     <main className="min-h-screen bg-black flex items-center justify-center px-4">
