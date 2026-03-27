@@ -72,6 +72,7 @@ export default function TiendaPage() {
     return []
   })
   const [mostrarCarrito, setMostrarCarrito] = useState(false)
+  const [busqueda, setBusqueda] = useState('')
 
   useEffect(() => {
     fetch(`https://catalogo-whatsapp-production.up.railway.app/api/tienda/${slug}`)
@@ -171,12 +172,22 @@ export default function TiendaPage() {
         </div>
       )}
 
+      {/* BUSCADOR Y CATALOGO */}
       <div className="px-6 py-8">
+        <div className="mb-6">
+          <input
+            type="text"
+            value={busqueda}
+            onChange={e => setBusqueda(e.target.value)}
+            placeholder="🔍 Buscar productos..."
+            className="w-full bg-gray-900 border border-gray-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-600 text-sm"
+          />
+        </div>
         {productos.length === 0 ? (
           <p className="text-gray-500 text-center py-20">Esta tienda aún no tiene productos</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {productos.map(producto => (
+            {productos.filter(p => p.nombre.toLowerCase().includes(busqueda.toLowerCase())).map(producto => (
               <ProductoCard key={producto.id} producto={producto} onAgregar={agregarAlCarrito} slug={slug} />
             ))}
           </div>
