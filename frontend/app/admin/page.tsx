@@ -38,7 +38,7 @@ export default function AdminPage() {
   const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
   const [mostrarListaProductos, setMostrarListaProductos] = useState(false)
   const [menuAbierto, setMenuAbierto] = useState(false)
-  const [tabLogin, setTabLogin] = useState<'login' | 'registro'>('registro')
+  const [tabLogin, setTabLogin] = useState<'login' | 'registro'>('login')
   const [regNombre, setRegNombre] = useState('')
   const [regEmail, setRegEmail] = useState('')
   const [regPassword, setRegPassword] = useState('')
