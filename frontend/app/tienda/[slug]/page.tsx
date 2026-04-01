@@ -30,6 +30,7 @@ function ProductoCard({ producto, onAgregar, slug }: any) {
       </a>
       <div className="p-4 flex flex-col flex-1">
         <h2 className="text-white text-base font-semibold leading-tight">{producto.nombre}</h2>
+        {producto.referencia && <p className="text-gray-500 text-xs">SKU: {producto.referencia}</p>}
         {producto.descripcion && (
           <p className="text-gray-500 text-sm mt-1 line-clamp-2">{producto.descripcion}</p>
         )}

@@ -112,6 +112,7 @@ export default function ProductoDetalle() {
 
           <div className="flex flex-col gap-4">
             <h2 className="text-white text-2xl font-bold">{producto.nombre}</h2>
+            {producto.referencia && <p className="text-gray-500 text-sm">SKU: {producto.referencia}</p>}
 
             {producto.categoria_nombre && (
               <span className="text-xs bg-gray-800 text-gray-300 px-3 py-1 rounded-full w-fit">📂 {producto.categoria_nombre}</span>
