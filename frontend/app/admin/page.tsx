@@ -343,7 +343,7 @@ export default function AdminPage() {
             <button type="submit" disabled={cargando} className="flex-1 bg-white text-black font-bold py-3 rounded-xl hover:bg-gray-200 transition disabled:opacity-50">
               {cargando ? 'Guardando...' : 'Guardar cambios'}
             </button>
-            <button type="button" onClick={() => setEditando(null)} className="flex-1 border border-gray-700 text-gray-400 font-bold py-3 rounded-xl hover:text-white transition">
+            <button type="button" onClick={() => { setEditando(null); setMostrarListaProductos(true) }} className="flex-1 border border-gray-700 text-gray-400 font-bold py-3 rounded-xl hover:text-white transition">
               Cancelar
             </button>
           </div>
