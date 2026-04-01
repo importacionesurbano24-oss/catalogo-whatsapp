@@ -80,7 +80,7 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
 // POST crear producto con categoría y marca
 router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) => {
   try {
-    const { nombre, descripcion, precio, precio_descuento, colores, tallas, categoria_id, marca_id } = req.body
+    const { nombre, descripcion, precio, precio_descuento, referencia, colores, tallas, categoria_id, marca_id } = req.body
     const admin_id = req.admin.id
    let imagenPrincipal = null
 
@@ -89,8 +89,8 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
     }
       // Validar que el admin no tenga más de 20 productos activos
     const result = await pool.query(
-      'INSERT INTO productos (nombre, descripcion, precio, precio_descuento, imagen, colores, tallas, admin_id, categoria_id, marca_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [nombre, descripcion, precio, precio_descuento || null, imagenPrincipal, colores, tallas, admin_id, categoria_id || null, marca_id || null]
+      'INSERT INTO productos (nombre, descripcion, precio, precio_descuento, referencia, imagen, colores, tallas, admin_id, categoria_id, marca_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+      [nombre, descripcion, precio, precio_descuento || null, referencia || null, imagenPrincipal, colores, tallas, admin_id, categoria_id || null, marca_id || null]
     )
       
     const productoId = result.rows[0].id
@@ -169,8 +169,8 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
     const imagenUrl = primeraImagen.rows.length > 0 ? primeraImagen.rows[0].imagen_url : producto.rows[0].imagen
 
  const result = await pool.query(
-      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, precio_descuento=$4, imagen=$5, colores=$6, tallas=$7, categoria_id=$8, marca_id=$9 WHERE id=$10 AND admin_id=$11 RETURNING *',
-      [nombre, descripcion, precio, precio_descuento || null, imagenUrl, colores, tallas, categoria_id || null, marca_id || null, id, adminId]
+      'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, precio_descuento=$4, referencia=$5, imagen=$6, colores=$7, tallas=$8, categoria_id=$9, marca_id=$10 WHERE id=$11 AND admin_id=$12 RETURNING *',
+      [nombre, descripcion, precio, precio_descuento || null, referencia || null, imagenUrl, colores, tallas, categoria_id || null, marca_id || null, id, adminId]
     )
     // Devolver producto con imágenes
     const imagenes = await pool.query(

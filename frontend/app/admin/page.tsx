@@ -17,6 +17,7 @@ export default function AdminPage() {
   const [descripcion, setDescripcion] = useState('')
   const [precio, setPrecio] = useState('')
   const [precioDescuento, setPrecioDescuento] = useState('')
+  const [referencia, setReferencia] = useState('')
   const [colores, setColores] = useState('')
   const [tallas, setTallas] = useState('')
   const [imagenes, setImagenes] = useState<File[]>([])
@@ -154,6 +155,7 @@ export default function AdminPage() {
     form.append('descripcion', descripcion)
     form.append('precio', precio)
     form.append('precio_descuento', precioDescuento)
+    form.append('referencia', referencia)
     form.append('colores', colores)
     form.append('tallas', tallas)
     form.append('categoria_id', categoriaId || '')
@@ -161,7 +163,7 @@ export default function AdminPage() {
     imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
-      setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento('')
+      setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento(''); setReferencia('')
       setColores(''); setTallas(''); setImagenes([])
       setCategoriaId(''); setMarcaId('')
       setMostrarForm(false)
@@ -177,7 +179,7 @@ export default function AdminPage() {
   }
 
   function iniciarEdicion(p: any) {
-    setEditando({ ...p, categoria_id: p.categoria_id || '', marca_id: p.marca_id || '', precio_descuento: p.precio_descuento || '', imagenes_eliminar: [] })
+    setEditando({ ...p, categoria_id: p.categoria_id || '', marca_id: p.marca_id || '', precio_descuento: p.precio_descuento || '', referencia: p.referencia || '', imagenes_eliminar: [] })
     setImagenEditar(null)
   }
 
@@ -189,6 +191,7 @@ export default function AdminPage() {
     form.append('descripcion', editando.descripcion || '')
     form.append('precio', editando.precio)
     form.append('precio_descuento', editando.precio_descuento || '')
+    form.append('referencia', editando.referencia || '')
     if (editando.imagenes_eliminar) form.append('imagenes_eliminar', JSON.stringify(editando.imagenes_eliminar))
     form.append('colores', editando.colores || '')
     form.append('tallas', editando.tallas || '')
@@ -286,6 +289,8 @@ export default function AdminPage() {
       <div className="w-full max-w-lg bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
         <h2 className="text-white font-bold text-lg">Editar producto</h2>
         <form onSubmit={guardarEdicion} className="space-y-4">
+        <input placeholder="Referencia / SKU (opcional)" value={editando.referencia} onChange={e => setEditando({ ...editando, referencia: e.target.value })}
+            className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
           <input placeholder="Nombre *" value={editando.nombre} onChange={e => setEditando({ ...editando, nombre: e.target.value })}
             className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
           <textarea placeholder="Descripcion" value={editando.descripcion || ''} onChange={e => setEditando({ ...editando, descripcion: e.target.value })}
@@ -576,6 +581,8 @@ export default function AdminPage() {
           {mostrarForm && (
             <form onSubmit={agregarProducto} className="bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
               <h2 className="text-white font-bold text-lg">Nuevo producto</h2>
+              <input placeholder="Referencia / SKU (opcional)" value={referencia} onChange={e => setReferencia(e.target.value)}
+                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
               <input placeholder="Nombre *" value={nombre} onChange={e => setNombre(e.target.value)}
                 className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" required />
               <textarea placeholder="Descripcion" value={descripcion} onChange={e => setDescripcion(e.target.value)}
