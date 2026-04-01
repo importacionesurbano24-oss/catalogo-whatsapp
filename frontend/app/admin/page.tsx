@@ -285,7 +285,16 @@ export default function AdminPage() {
   
 
   if (editando) return (
-    <main className="min-h-screen bg-black flex items-center justify-center px-4">
+    <main className="min-h-screen bg-black">
+      <div className="flex">
+        <aside className="w-56 min-h-screen bg-gray-950 border-r border-gray-800 p-4 flex flex-col gap-1 fixed">
+          <h1 className="text-white font-bold text-lg mb-6 px-3">Panel Admin</h1>
+          <button onClick={() => { setEditando(null); setMostrarListaProductos(true) }}
+            className="flex items-center gap-3 text-gray-400 hover:text-white hover:bg-gray-800 px-3 py-2.5 rounded-xl text-sm transition text-left w-full">
+            ← Volver a productos
+          </button>
+        </aside>
+        <div className="ml-56 px-6 py-8 max-w-4xl mx-auto w-full">
       <div className="w-full max-w-lg bg-gray-900 rounded-2xl p-6 border border-gray-800 space-y-4">
         <h2 className="text-white font-bold text-lg">Editar producto</h2>
         <form onSubmit={guardarEdicion} className="space-y-4">
@@ -348,6 +357,8 @@ export default function AdminPage() {
             </button>
           </div>
         </form>
+      </div>
+        </div>
       </div>
     </main>
   )
