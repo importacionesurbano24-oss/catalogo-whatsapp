@@ -125,7 +125,7 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
   try {
     const { id } = req.params
     const adminId = req.admin.id
-    const { nombre, descripcion, precio, precio_descuento, colores, tallas, categoria_id, marca_id, imagenes_eliminar } = req.body
+    const { nombre, descripcion, precio, precio_descuento, referencia, colores, tallas, categoria_id, marca_id, imagenes_eliminar } = req.body
 
     const producto = await pool.query(
       'SELECT * FROM productos WHERE id = $1 AND admin_id = $2',
