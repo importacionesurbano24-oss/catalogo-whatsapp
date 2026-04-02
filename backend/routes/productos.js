@@ -24,7 +24,7 @@ async function subirImagen(file) {
   return resultado.secure_url
 }
 
-// GET todos los productos optimizado (Una sola consulta)
+// GET todos los productos con imágenes y variantes
 router.get('/', async (req, res) => {
   try {
     const query = `
@@ -34,7 +34,13 @@ router.get('/', async (req, res) => {
          FROM producto_imagenes pi 
          WHERE pi.producto_id = p.id), 
         '[]'
-      ) AS imagenes
+      ) AS imagenes,
+      COALESCE(
+        (SELECT json_agg(json_build_object('id', pv.id, 'color', pv.color, 'talla', pv.talla, 'precio', pv.precio, 'precio_descuento', pv.precio_descuento, 'stock', pv.stock) ORDER BY pv.id)
+         FROM producto_variantes pv 
+         WHERE pv.producto_id = p.id), 
+        '[]'
+      ) AS variantes
       FROM productos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
       LEFT JOIN marcas m ON p.marca_id = m.id
@@ -49,7 +55,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET productos del admin logueado optimizado
+// GET productos del admin logueado con variantes
 router.get('/mis-productos', verificarToken, async (req, res) => {
   try {
     const adminId = req.admin.id;
@@ -60,7 +66,13 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
          FROM producto_imagenes pi 
          WHERE pi.producto_id = p.id), 
         '[]'
-      ) AS imagenes
+      ) AS imagenes,
+      COALESCE(
+        (SELECT json_agg(json_build_object('id', pv.id, 'color', pv.color, 'talla', pv.talla, 'precio', pv.precio, 'precio_descuento', pv.precio_descuento, 'stock', pv.stock) ORDER BY pv.id)
+         FROM producto_variantes pv 
+         WHERE pv.producto_id = p.id), 
+        '[]'
+      ) AS variantes
       FROM productos p
       LEFT JOIN categorias c ON p.categoria_id = c.id
       LEFT JOIN marcas m ON p.marca_id = m.id
@@ -77,17 +89,17 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
   }
 });
 
-// POST crear producto con categoría y marca
+// POST crear producto con variantes
 router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) => {
   try {
-    const { nombre, descripcion, precio, precio_descuento, referencia, colores, tallas, categoria_id, marca_id } = req.body
+    const { nombre, descripcion, precio, precio_descuento, referencia, colores, tallas, categoria_id, marca_id, variantes } = req.body
     const admin_id = req.admin.id
-   let imagenPrincipal = null
+    let imagenPrincipal = null
 
     if (req.files && req.files.length > 0) {
       imagenPrincipal = await subirImagen(req.files[0])
     }
-      // Validar que el admin no tenga más de 20 productos activos
+
     const result = await pool.query(
       'INSERT INTO productos (nombre, descripcion, precio, precio_descuento, referencia, imagen, colores, tallas, admin_id, categoria_id, marca_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
       [nombre, descripcion, precio, precio_descuento || null, referencia || null, imagenPrincipal, colores, tallas, admin_id, categoria_id || null, marca_id || null]
@@ -95,7 +107,7 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
       
     const productoId = result.rows[0].id
 
-    // Subir imágenes adicionales a la tabla producto_imagenes
+    // Subir imágenes
     if (req.files && req.files.length > 0) {
       for (let i = 0; i < req.files.length; i++) {
         const url = i === 0 ? imagenPrincipal : await subirImagen(req.files[i])
@@ -106,12 +118,28 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
       }
     }
 
-    // Devolver producto con imágenes
+    // Guardar variantes
+    if (variantes) {
+      const variantesArr = JSON.parse(variantes)
+      for (const v of variantesArr) {
+        await pool.query(
+          'INSERT INTO producto_variantes (producto_id, color, talla, precio, precio_descuento, stock) VALUES ($1, $2, $3, $4, $5, $6)',
+          [productoId, v.color || null, v.talla || null, v.precio, v.precio_descuento || null, v.stock || 0]
+        )
+      }
+    }
+
+    // Devolver producto completo
     const imagenes = await pool.query(
       'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
       [productoId]
     )
+    const variantesResult = await pool.query(
+      'SELECT id, color, talla, precio, precio_descuento, stock FROM producto_variantes WHERE producto_id = $1 ORDER BY id',
+      [productoId]
+    )
     result.rows[0].imagenes = imagenes.rows
+    result.rows[0].variantes = variantesResult.rows
 
     res.json(result.rows[0])
   } catch (error) {
@@ -120,12 +148,12 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
   }
 })
 
-// PUT editar producto con categoría y marca
+// PUT editar producto con variantes
 router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res) => {
   try {
     const { id } = req.params
     const adminId = req.admin.id
-    const { nombre, descripcion, precio, precio_descuento, referencia, colores, tallas, categoria_id, marca_id, imagenes_eliminar } = req.body
+    const { nombre, descripcion, precio, precio_descuento, referencia, colores, tallas, categoria_id, marca_id, imagenes_eliminar, variantes } = req.body
 
     const producto = await pool.query(
       'SELECT * FROM productos WHERE id = $1 AND admin_id = $2',
@@ -161,33 +189,51 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
       }
     }
 
-    // Actualizar imagen principal con la primera imagen de la galería
+    // Actualizar imagen principal
     const primeraImagen = await pool.query(
       'SELECT imagen_url FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden LIMIT 1',
       [id]
     )
     const imagenUrl = primeraImagen.rows.length > 0 ? primeraImagen.rows[0].imagen_url : producto.rows[0].imagen
 
- const result = await pool.query(
+    const result = await pool.query(
       'UPDATE productos SET nombre=$1, descripcion=$2, precio=$3, precio_descuento=$4, referencia=$5, imagen=$6, colores=$7, tallas=$8, categoria_id=$9, marca_id=$10 WHERE id=$11 AND admin_id=$12 RETURNING *',
       [nombre, descripcion, precio, precio_descuento || null, referencia || null, imagenUrl, colores, tallas, categoria_id || null, marca_id || null, id, adminId]
     )
-    // Devolver producto con imágenes
+
+    // Actualizar variantes: eliminar las viejas y crear las nuevas
+    if (variantes) {
+      await pool.query('DELETE FROM producto_variantes WHERE producto_id = $1', [id])
+      const variantesArr = JSON.parse(variantes)
+      for (const v of variantesArr) {
+        await pool.query(
+          'INSERT INTO producto_variantes (producto_id, color, talla, precio, precio_descuento, stock) VALUES ($1, $2, $3, $4, $5, $6)',
+          [id, v.color || null, v.talla || null, v.precio, v.precio_descuento || null, v.stock || 0]
+        )
+      }
+    }
+
+    // Devolver producto completo
     const imagenes = await pool.query(
       'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
       [id]
     )
+    const variantesResult = await pool.query(
+      'SELECT id, color, talla, precio, precio_descuento, stock FROM producto_variantes WHERE producto_id = $1 ORDER BY id',
+      [id]
+    )
     result.rows[0].imagenes = imagenes.rows
+    result.rows[0].variantes = variantesResult.rows
 
     res.json(result.rows[0])
 
   } catch (error) {
-    // ---- AQUÍ ESTABA EL ERROR: FALTABA ESTE BLOQUE CATCH ----
     console.error('Error al editar producto:', error.message)
     res.status(500).json({ error: 'Error al editar producto: ' + error.message })
   }
 })
-// GET producto individual por ID (público)
+
+// GET producto individual por ID (público) con variantes
 router.get('/detalle/:id', async (req, res) => {
   try {
     const { id } = req.params
@@ -208,7 +254,12 @@ router.get('/detalle/:id', async (req, res) => {
       'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
       [id]
     )
+    const variantes = await pool.query(
+      'SELECT id, color, talla, precio, precio_descuento, stock FROM producto_variantes WHERE producto_id = $1 ORDER BY id',
+      [id]
+    )
     producto.imagenes = imagenes.rows
+    producto.variantes = variantes.rows
 
     res.json(producto)
   } catch (error) {

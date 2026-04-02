@@ -30,15 +30,6 @@ router.put('/configuracion', verificarToken, upload.single('logo'), async (req, 
       logoUrl = resultado.secure_url
     }
 
-    const campos = ['nombre=$1', 'whatsapp=$2', 'color=$3', 'descripcion_tienda=$4']
-    const valores = [nombre, whatsapp, color, descripcion_tienda, adminId]
-
-    if (logoUrl) {
-      campos.push('logo=$6')
-      valores.splice(4, 0, logoUrl)
-      valores[valores.length - 1] = adminId
-    }
-
     await pool.query(
       `UPDATE admins SET nombre=$1, whatsapp=$2, color=$3, descripcion_tienda=$4${logoUrl ? ', logo=$5' : ''} WHERE id=$${logoUrl ? 6 : 5}`,
       logoUrl ? [nombre, whatsapp, color, descripcion_tienda, logoUrl, adminId] : [nombre, whatsapp, color, descripcion_tienda, adminId]
@@ -65,7 +56,7 @@ router.get('/configuracion', verificarToken, async (req, res) => {
   }
 })
 
-// GET tienda pública por slug
+// GET tienda pública por slug (con variantes)
 router.get('/:slug', async (req, res) => {
   try {
     const { slug } = req.params
@@ -76,18 +67,27 @@ router.get('/:slug', async (req, res) => {
     if (tienda.rows.length === 0) {
       return res.status(404).json({ error: 'Tienda no encontrada' })
     }
+
     const productos = await pool.query(
       'SELECT * FROM productos WHERE admin_id = $1',
       [tienda.rows[0].id]
     )
-    // Agregar imágenes a cada producto
+
+    // Agregar imágenes y variantes a cada producto
     for (let producto of productos.rows) {
       const imagenes = await pool.query(
         'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
         [producto.id]
       )
       producto.imagenes = imagenes.rows
+
+      const variantes = await pool.query(
+        'SELECT id, color, talla, precio, precio_descuento, stock FROM producto_variantes WHERE producto_id = $1 ORDER BY id',
+        [producto.id]
+      )
+      producto.variantes = variantes.rows
     }
+
     const { password, ...tiendaSegura } = tienda.rows[0]
     res.json({ tienda: tiendaSegura, productos: productos.rows })
   } catch (error) {
