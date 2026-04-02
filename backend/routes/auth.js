@@ -18,10 +18,27 @@ router.post('/registro', async (req, res) => {
     // Encriptar contraseña
     const passwordEncriptado = await bcrypt.hash(password, 10)
 
+    // Generar slug único desde el nombre
+    const slugBase = nombre.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+
+    // Verificar si el slug ya existe y hacerlo único
+    let slug = slugBase
+    let contador = 1
+    while (true) {
+      const slugExiste = await pool.query('SELECT id FROM admins WHERE slug = $1', [slug])
+      if (slugExiste.rows.length === 0) break
+      slug = `${slugBase}-${contador}`
+      contador++
+    }
+
     // Crear admin
     const result = await pool.query(
-      'INSERT INTO admins (nombre, email, password, whatsapp, rol, plan) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [nombre, email, passwordEncriptado, whatsapp || null, 'admin', 'gratis']
+      'INSERT INTO admins (nombre, email, password, whatsapp, rol, plan, slug) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [nombre, email, passwordEncriptado, whatsapp || null, 'admin', 'gratis', slug]
     )
 
     res.json({ mensaje: 'Cuenta creada exitosamente', admin: result.rows[0] })
