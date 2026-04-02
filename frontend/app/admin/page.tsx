@@ -38,6 +38,7 @@ export default function AdminPage() {
   const [nuevaMarca, setNuevaMarca] = useState('')
   const [mostrarSubProductos, setMostrarSubProductos] = useState(false)
   const [mostrarListaProductos, setMostrarListaProductos] = useState(false)
+   const [mostrarDashboard, setMostrarDashboard] = useState(true)
   const [menuAbierto, setMenuAbierto] = useState(false)
   const [tabLogin, setTabLogin] = useState<'login' | 'registro'>('login')
   const [regNombre, setRegNombre] = useState('')
@@ -245,6 +246,7 @@ export default function AdminPage() {
   }
 
   function navegarYCerrarMenu(accion: () => void) {
+    setMostrarDashboard(false)
     accion()
     setMenuAbierto(false)
   }
@@ -513,6 +515,63 @@ export default function AdminPage() {
 
         {/* CONTENIDO PRINCIPAL */}
         <div className="w-full md:ml-56 px-4 md:px-6 py-8 pt-16 md:pt-8 max-w-4xl mx-auto space-y-8">
+          {mostrarDashboard && (
+            <div className="space-y-6">
+              <h2 className="text-white font-bold text-xl">¡Hola, {adminInfo?.nombre || 'Admin'}!</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 text-center">
+                  <p className="text-3xl font-bold text-white">{productos.length}</p>
+                  <p className="text-gray-400 text-sm mt-1">Productos</p>
+                </div>
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 text-center">
+                  <p className="text-3xl font-bold text-white">{categorias.length}</p>
+                  <p className="text-gray-400 text-sm mt-1">Categorías</p>
+                </div>
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 text-center">
+                  <p className="text-3xl font-bold text-white">{marcas.length}</p>
+                  <p className="text-gray-400 text-sm mt-1">Marcas</p>
+                </div>
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 text-center">
+                  <p className="text-3xl font-bold text-green-400">{adminInfo?.plan || 'gratis'}</p>
+                  <p className="text-gray-400 text-sm mt-1">Plan</p>
+                </div>
+              </div>
+
+              {config.slug && (
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
+                  <p className="text-gray-400 text-sm mb-2">Link de tu tienda:</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-green-400 text-sm flex-1 truncate">catalogo-whatsapp-green.vercel.app/tienda/{config.slug}</p>
+                    <button onClick={() => navigator.clipboard.writeText(`https://catalogo-whatsapp-green.vercel.app/tienda/${config.slug}`)}
+                      className="bg-gray-800 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-gray-700 transition">
+                      Copiar
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {productos.length > 0 && (
+                <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
+                  <h3 className="text-white font-bold text-sm mb-3">Últimos productos</h3>
+                  <div className="space-y-2">
+                    {productos.slice(0, 3).map(p => (
+                      <div key={p.id} className="flex items-center gap-3">
+                        {p.imagen ? (
+                          <img src={p.imagen} alt={p.nombre} className="w-10 h-10 object-cover rounded-lg" />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center"><span className="text-sm">📦</span></div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-sm truncate">{p.nombre}</p>
+                          <p className="text-gray-500 text-xs">{Number(p.precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {mostrarCatMarcas && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800 space-y-4">
