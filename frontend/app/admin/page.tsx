@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [colores, setColores] = useState('')
   const [tallas, setTallas] = useState('')
   const [imagenes, setImagenes] = useState<File[]>([])
+  const [imagenesColores, setImagenesColores] = useState<string[]>([])
   const [categoriaId, setCategoriaId] = useState('')
   const [marcaId, setMarcaId] = useState('')
   const [editando, setEditando] = useState<any | null>(null)
@@ -161,11 +162,14 @@ export default function AdminPage() {
     form.append('tallas', tallas)
     form.append('categoria_id', categoriaId || '')
     form.append('marca_id', marcaId || '')
+    if (imagenesColores.length > 0) {
+      form.append('imagenes_colores', JSON.stringify(imagenesColores))
+    }
     imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
       setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento(''); setReferencia('')
-      setColores(''); setTallas(''); setImagenes([])
+      setColores(''); setTallas(''); setImagenes([]); setImagenesColores([])
       setCategoriaId(''); setMarcaId('')
       setMostrarForm(false)
       cargarProductos(token!)
@@ -680,11 +684,24 @@ export default function AdminPage() {
             <div>
                 <label className="text-gray-400 text-sm block mb-2">Imágenes del producto (máx. 10)</label>
                 {imagenes.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-3 mb-3">
                     {imagenes.map((img, i) => (
-                      <div key={i} className="relative">
+                      <div key={i} className="relative flex flex-col items-center gap-1">
                         <img src={URL.createObjectURL(img)} alt="preview" className="w-20 h-20 object-cover rounded-xl" />
-                        <button type="button" onClick={() => setImagenes(imagenes.filter((_, idx) => idx !== i))}
+                        <input
+                          placeholder="Color"
+                          value={imagenesColores[i] || ''}
+                          onChange={e => {
+                            const nuevos = [...imagenesColores]
+                            nuevos[i] = e.target.value
+                            setImagenesColores(nuevos)
+                          }}
+                          className="w-20 bg-gray-800 border border-gray-700 text-white rounded-lg px-2 py-1 text-xs text-center focus:outline-none"
+                        />
+                        <button type="button" onClick={() => {
+                          setImagenes(imagenes.filter((_, idx) => idx !== i))
+                          setImagenesColores(imagenesColores.filter((_, idx) => idx !== i))
+                        }}
                           className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">✕</button>
                       </div>
                     ))}

@@ -138,18 +138,24 @@ export default function ProductoDetalle() {
             </div>
 
             {producto.colores && producto.colores.trim() !== '' && (
-              <div>
-                <label className="text-gray-400 text-sm mb-1 block">Color</label>
-                <select value={colorSel} onChange={e => setColorSel(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl p-3 text-sm focus:outline-none focus:border-gray-500">
-                  <option value="">🎨 Elegir color</option>
-                  {producto.colores.split(',').map((color: string, i: number) => (
-                    <option key={i} value={color.trim()}>{color.trim()}</option>
-                  ))}
-                </select>
+            <div>
+              <label className="text-gray-400 text-sm mb-2 block">Color: {colorSel && <span className="text-white">{colorSel}</span>}</label>
+              <div className="flex flex-wrap gap-2">
+                {producto.colores.split(',').map((color: string, i: number) => (
+                  <button key={i} type="button"
+                    onClick={() => {
+                      setColorSel(color.trim())
+                      const imgColor = producto.imagenes?.find((img: any) => img.color && img.color.toLowerCase() === color.trim().toLowerCase())
+                      if (imgColor) setImagenActiva(imgColor.imagen_url)
+                    }}
+                    className={`w-10 h-10 rounded-full border-2 transition-all ${colorSel === color.trim() ? 'border-white scale-110' : 'border-gray-600 hover:border-gray-400'}`}
+                    style={{ backgroundColor: color.trim().toLowerCase() }}
+                    title={color.trim()}
+                  />
+                ))}
               </div>
-            )}
-
+            </div>
+        )}
             {producto.tallas && producto.tallas.trim() !== '' && (
               <div>
                 <label className="text-gray-400 text-sm mb-1 block">Talla</label>

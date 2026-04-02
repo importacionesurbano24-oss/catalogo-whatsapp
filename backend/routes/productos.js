@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     const query = `
       SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
       COALESCE(
-        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden) ORDER BY pi.orden)
+        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden, 'color', pi.color) ORDER BY pi.orden)
          FROM producto_imagenes pi 
          WHERE pi.producto_id = p.id), 
         '[]'
@@ -109,11 +109,13 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
 
     // Subir imágenes
     if (req.files && req.files.length > 0) {
+      const coloresImg = req.body.imagenes_colores ? JSON.parse(req.body.imagenes_colores) : []
       for (let i = 0; i < req.files.length; i++) {
         const url = i === 0 ? imagenPrincipal : await subirImagen(req.files[i])
+        const colorImg = coloresImg[i] || null
         await pool.query(
-          'INSERT INTO producto_imagenes (producto_id, imagen_url, orden) VALUES ($1, $2, $3)',
-          [productoId, url, i]
+          'INSERT INTO producto_imagenes (producto_id, imagen_url, orden, color) VALUES ($1, $2, $3, $4)',
+          [productoId, url, i, colorImg]
         )
       }
     }
@@ -131,7 +133,7 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
 
     // Devolver producto completo
     const imagenes = await pool.query(
-      'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
+      'SELECT id, imagen_url, orden, color FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
       [productoId]
     )
     const variantesResult = await pool.query(
@@ -180,11 +182,13 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
       )
       let orden = maxOrden.rows[0].max_orden + 1
 
+      const coloresImg = req.body.imagenes_colores ? JSON.parse(req.body.imagenes_colores) : []
       for (let i = 0; i < req.files.length; i++) {
         const url = await subirImagen(req.files[i])
+        const colorImg = coloresImg[i] || null
         await pool.query(
-          'INSERT INTO producto_imagenes (producto_id, imagen_url, orden) VALUES ($1, $2, $3)',
-          [id, url, orden + i]
+          'INSERT INTO producto_imagenes (producto_id, imagen_url, orden, color) VALUES ($1, $2, $3, $4)',
+          [id, url, orden + i, colorImg]
         )
       }
     }
