@@ -6,6 +6,32 @@ function formatearPrecio(precio: any) {
   return Number(precio).toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 })
 }
 
+const COLORES_ES: Record<string, string> = {
+  rojo: '#e53e3e', roja: '#e53e3e',
+  azul: '#3182ce', azules: '#3182ce',
+  verde: '#38a169',
+  negro: '#1a1a1a', negra: '#1a1a1a',
+  blanco: '#ffffff', blanca: '#ffffff',
+  amarillo: '#d69e2e', amarilla: '#d69e2e',
+  rosado: '#ed64a6', rosa: '#ed64a6',
+  morado: '#805ad5', violeta: '#805ad5',
+  naranja: '#dd6b20',
+  gris: '#718096', plata: '#a0aec0',
+  cafe: '#744210', marron: '#744210', marrón: '#744210',
+  beige: '#d4a574', crema: '#fffdd0',
+  turquesa: '#38b2ac', aqua: '#00bcd4',
+  dorado: '#d4af37', oro: '#d4af37',
+  salmon: '#fa8072', salmón: '#fa8072',
+  lila: '#b794f4', lavanda: '#e6e6fa',
+  fucsia: '#ff1493', magenta: '#ff00ff',
+  cian: '#00bcd4',
+}
+
+function colorCSS(color: string): string {
+  const c = color.trim().toLowerCase()
+  return COLORES_ES[c] || c
+}
+
 export default function ProductoDetalle() {
   const params = useParams()
   const slug = params.slug
@@ -149,7 +175,7 @@ export default function ProductoDetalle() {
                       if (imgColor) setImagenActiva(imgColor.imagen_url)
                     }}
                     className={`w-10 h-10 rounded-full border-2 transition-all ${colorSel === color.trim() ? 'border-white scale-110' : 'border-gray-600 hover:border-gray-400'}`}
-                    style={{ backgroundColor: color.trim().toLowerCase() }}
+                    style={{ backgroundColor: colorCSS(color) }}
                     title={color.trim()}
                   />
                 ))}
