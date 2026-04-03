@@ -109,7 +109,8 @@ router.post('/', verificarToken, upload.array('imagenes', 10), async (req, res) 
 
     // Subir imágenes
     if (req.files && req.files.length > 0) {
-      const coloresImg = req.body.imagenes_colores ? JSON.parse(req.body.imagenes_colores) : []
+      let coloresImg = []
+      try { coloresImg = req.body.imagenes_colores ? JSON.parse(req.body.imagenes_colores) : [] } catch(e) { coloresImg = [] }
       for (let i = 0; i < req.files.length; i++) {
         const url = i === 0 ? imagenPrincipal : await subirImagen(req.files[i])
         const colorImg = coloresImg[i] || null
@@ -182,7 +183,8 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
       )
       let orden = maxOrden.rows[0].max_orden + 1
 
-      const coloresImg = req.body.imagenes_colores ? JSON.parse(req.body.imagenes_colores) : []
+      let coloresImg = []
+      try { coloresImg = req.body.imagenes_colores ? JSON.parse(req.body.imagenes_colores) : [] } catch(e) { coloresImg = [] }
       for (let i = 0; i < req.files.length; i++) {
         const url = await subirImagen(req.files[i])
         const colorImg = coloresImg[i] || null
