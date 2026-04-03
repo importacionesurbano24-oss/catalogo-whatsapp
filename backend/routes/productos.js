@@ -219,7 +219,7 @@ router.put('/:id', verificarToken, upload.array('imagenes', 10), async (req, res
 
     // Devolver producto completo
     const imagenes = await pool.query(
-      'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
+      'SELECT id, imagen_url, orden, color FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
       [id]
     )
     const variantesResult = await pool.query(
@@ -255,7 +255,7 @@ router.get('/detalle/:id', async (req, res) => {
 
     const producto = result.rows[0]
     const imagenes = await pool.query(
-      'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
+      'SELECT id, imagen_url, orden, color FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
       [id]
     )
     const variantes = await pool.query(

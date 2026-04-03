@@ -76,7 +76,7 @@ router.get('/:slug', async (req, res) => {
     // Agregar imágenes y variantes a cada producto
     for (let producto of productos.rows) {
       const imagenes = await pool.query(
-        'SELECT id, imagen_url, orden FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
+        'SELECT id, imagen_url, orden, color FROM producto_imagenes WHERE producto_id = $1 ORDER BY orden',
         [producto.id]
       )
       producto.imagenes = imagenes.rows

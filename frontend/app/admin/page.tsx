@@ -165,6 +165,9 @@ export default function AdminPage() {
     if (imagenesColores.length > 0) {
       form.append('imagenes_colores', JSON.stringify(imagenesColores))
     }
+    if (imagenesColores.length > 0) {
+      form.append('imagenes_colores', JSON.stringify(imagenesColores))
+    }
     imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
@@ -703,6 +706,16 @@ export default function AdminPage() {
                           setImagenesColores(imagenesColores.filter((_, idx) => idx !== i))
                         }}
                           className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">✕</button>
+                          <input
+                          placeholder="Color"
+                          value={imagenesColores[i] || ''}
+                          onChange={e => {
+                            const nuevos = [...imagenesColores]
+                            nuevos[i] = e.target.value
+                            setImagenesColores(nuevos)
+                          }}
+                          className="w-20 bg-gray-800 border border-gray-700 text-white rounded-lg px-2 py-1 text-xs text-center focus:outline-none"
+                        />
                       </div>
                     ))}
                   </div>
