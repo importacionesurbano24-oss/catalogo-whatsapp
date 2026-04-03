@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
     const query = `
       SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
       COALESCE(
-        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden, 'color', pi.color) ORDER BY pi.orden)
+        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden, 'color', pi.color, 'color', pi.color) ORDER BY pi.orden)
          FROM producto_imagenes pi 
          WHERE pi.producto_id = p.id), 
         '[]'
@@ -62,7 +62,7 @@ router.get('/mis-productos', verificarToken, async (req, res) => {
     const query = `
       SELECT p.*, c.nombre AS categoria_nombre, m.nombre AS marca_nombre,
       COALESCE(
-        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden) ORDER BY pi.orden)
+        (SELECT json_agg(json_build_object('id', pi.id, 'imagen_url', pi.imagen_url, 'orden', pi.orden, 'color', pi.color) ORDER BY pi.orden)
          FROM producto_imagenes pi 
          WHERE pi.producto_id = p.id), 
         '[]'
