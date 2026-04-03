@@ -165,9 +165,7 @@ export default function AdminPage() {
     if (imagenesColores.length > 0) {
       form.append('imagenes_colores', JSON.stringify(imagenesColores))
     }
-    if (imagenesColores.length > 0) {
-      form.append('imagenes_colores', JSON.stringify(imagenesColores))
-    }
+   
     imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
