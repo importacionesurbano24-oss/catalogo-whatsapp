@@ -18,10 +18,9 @@ export default function AdminPage() {
   const [precio, setPrecio] = useState('')
   const [precioDescuento, setPrecioDescuento] = useState('')
   const [referencia, setReferencia] = useState('')
-  const [colores, setColores] = useState('')
-  const [tallas, setTallas] = useState('')
   const [imagenes, setImagenes] = useState<File[]>([])
   const [imagenesColores, setImagenesColores] = useState<string[]>([])
+  const [variantesConfig, setVariantesConfig] = useState<{nombre: string, valores: string[], inputVal: string}[]>([])
   const [categoriaId, setCategoriaId] = useState('')
   const [marcaId, setMarcaId] = useState('')
   const [editando, setEditando] = useState<any | null>(null)
@@ -158,8 +157,10 @@ export default function AdminPage() {
     form.append('precio', precio)
     form.append('precio_descuento', precioDescuento)
     form.append('referencia', referencia)
-    form.append('colores', colores)
-    form.append('tallas', tallas)
+    const varColor = variantesConfig.find(v => /color/i.test(v.nombre))
+    const varTalla = variantesConfig.find(v => /talla|size|tamaño|tamano/i.test(v.nombre))
+    form.append('colores', varColor ? varColor.valores.join(',') : '')
+    form.append('tallas', varTalla ? varTalla.valores.join(',') : '')
     form.append('categoria_id', categoriaId || '')
     form.append('marca_id', marcaId || '')
     if (imagenesColores.length > 0) {
@@ -170,7 +171,7 @@ export default function AdminPage() {
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
     if (res.ok) {
       setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento(''); setReferencia('')
-      setColores(''); setTallas(''); setImagenes([]); setImagenesColores([])
+      setImagenes([]); setImagenesColores([]); setVariantesConfig([])
       setCategoriaId(''); setMarcaId('')
       setMostrarForm(false)
       cargarProductos(token!)
@@ -248,6 +249,30 @@ export default function AdminPage() {
   function slugSeguro() {
     const base = (config.slug || config.nombre || '').trim().toLowerCase()
     return base.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
+  }
+
+  function agregarTipoVariante() {
+    setVariantesConfig(prev => [...prev, { nombre: '', valores: [], inputVal: '' }])
+  }
+  function actualizarNombreVariante(i: number, nombre: string) {
+    setVariantesConfig(prev => prev.map((v, idx) => idx === i ? { ...v, nombre } : v))
+  }
+  function actualizarInputVariante(i: number, inputVal: string) {
+    setVariantesConfig(prev => prev.map((v, idx) => idx === i ? { ...v, inputVal } : v))
+  }
+  function agregarValorVariante(i: number) {
+    setVariantesConfig(prev => prev.map((v, idx) => {
+      if (idx !== i || !v.inputVal.trim()) return v
+      return { ...v, valores: [...v.valores, v.inputVal.trim()], inputVal: '' }
+    }))
+  }
+  function eliminarValorVariante(i: number, j: number) {
+    setVariantesConfig(prev => prev.map((v, idx) =>
+      idx === i ? { ...v, valores: v.valores.filter((_, vi) => vi !== j) } : v
+    ))
+  }
+  function eliminarTipoVariante(i: number) {
+    setVariantesConfig(prev => prev.filter((_, idx) => idx !== i))
   }
 
   function navegarYCerrarMenu(accion: () => void) {
@@ -678,34 +703,95 @@ export default function AdminPage() {
                   {marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                 </select>
               </div>
-              <input placeholder="Colores (separados por coma)" value={colores} onChange={e => setColores(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
-              <input placeholder="Tallas (separadas por coma)" value={tallas} onChange={e => setTallas(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:border-gray-500" />
+              {/* Variantes estilo Shopify */}
+              <div className="border border-gray-700 rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-800 border-b border-gray-700">
+                  <h3 className="text-white font-semibold text-sm">Variantes</h3>
+                  <button type="button" onClick={agregarTipoVariante}
+                    className="text-blue-400 hover:text-blue-300 text-sm font-medium flex items-center gap-1 transition">
+                    + Agregar variante
+                  </button>
+                </div>
+                {variantesConfig.length === 0 && (
+                  <p className="px-4 py-5 text-gray-500 text-sm text-center">
+                    Agrega variantes como Color, Talla, Tamaño...
+                  </p>
+                )}
+                {variantesConfig.map((v, i) => (
+                  <div key={i} className="px-4 py-3 border-b border-gray-800 last:border-b-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        placeholder="Nombre (ej: Color, Talla)"
+                        value={v.nombre}
+                        onChange={e => actualizarNombreVariante(i, e.target.value)}
+                        className="bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-gray-500 flex-1"
+                      />
+                      <button type="button" onClick={() => eliminarTipoVariante(i)}
+                        className="text-gray-500 hover:text-red-400 transition text-lg leading-none">✕</button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 items-center">
+                      {v.valores.map((val, j) => (
+                        <span key={j} className="flex items-center gap-1 bg-gray-700 text-gray-200 text-xs px-3 py-1 rounded-full">
+                          {/color/i.test(v.nombre) && (
+                            <span className="w-3 h-3 rounded-full border border-gray-500 inline-block flex-shrink-0"
+                              style={{ backgroundColor: val.toLowerCase() }} />
+                          )}
+                          {val}
+                          <button type="button" onClick={() => eliminarValorVariante(i, j)}
+                            className="hover:text-red-400 ml-0.5 transition">×</button>
+                        </span>
+                      ))}
+                      <input
+                        placeholder="Escribir + Enter"
+                        value={v.inputVal}
+                        onChange={e => actualizarInputVariante(i, e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); agregarValorVariante(i) } }}
+                        className="bg-transparent border-b border-gray-600 text-white text-sm px-1 py-0.5 focus:outline-none focus:border-gray-400 min-w-32"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             <div>
                 <label className="text-gray-400 text-sm block mb-2">Imágenes del producto (máx. 10)</label>
                 {imagenes.length > 0 && (
                   <div className="flex flex-wrap gap-3 mb-3">
-                    {imagenes.map((img, i) => (
+                    {imagenes.map((img, i) => {
+                      const varColor = variantesConfig.find(v => /color/i.test(v.nombre))
+                      return (
                       <div key={i} className="relative flex flex-col items-center gap-1">
                         <img src={URL.createObjectURL(img)} alt="preview" className="w-20 h-20 object-cover rounded-xl" />
-                        <input
-                          placeholder="Color"
-                          value={imagenesColores[i] || ''}
-                          onChange={e => {
-                            const nuevos = [...imagenesColores]
-                            nuevos[i] = e.target.value
-                            setImagenesColores(nuevos)
-                          }}
-                          className="w-20 bg-gray-800 border border-gray-700 text-white rounded-lg px-2 py-1 text-xs text-center focus:outline-none"
-                        />
+                        {varColor && varColor.valores.length > 0 ? (
+                          <select
+                            value={imagenesColores[i] || ''}
+                            onChange={e => {
+                              const nuevos = [...imagenesColores]
+                              nuevos[i] = e.target.value
+                              setImagenesColores(nuevos)
+                            }}
+                            className="w-20 bg-gray-800 border border-gray-700 text-white rounded-lg px-1 py-1 text-xs text-center focus:outline-none">
+                            <option value="">Color</option>
+                            {varColor.valores.map((c, ci) => <option key={ci} value={c}>{c}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            placeholder="Color"
+                            value={imagenesColores[i] || ''}
+                            onChange={e => {
+                              const nuevos = [...imagenesColores]
+                              nuevos[i] = e.target.value
+                              setImagenesColores(nuevos)
+                            }}
+                            className="w-20 bg-gray-800 border border-gray-700 text-white rounded-lg px-2 py-1 text-xs text-center focus:outline-none"
+                          />
+                        )}
                         <button type="button" onClick={() => {
                           setImagenes(imagenes.filter((_, idx) => idx !== i))
                           setImagenesColores(imagenesColores.filter((_, idx) => idx !== i))
                         }}
                           className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">✕</button>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 )}
                 <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-gray-500 transition">
