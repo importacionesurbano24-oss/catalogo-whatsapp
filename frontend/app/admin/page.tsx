@@ -169,14 +169,18 @@ export default function AdminPage() {
    
     imagenes.forEach(img => form.append('imagenes', img))
     const res = await fetch(`${API}/api/productos`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: form })
-    if (res.ok) {
+        if (res.ok) {
       setNombre(''); setDescripcion(''); setPrecio(''); setPrecioDescuento(''); setReferencia('')
       setImagenes([]); setImagenesColores([]); setVariantesConfig([])
       setCategoriaId(''); setMarcaId('')
       setMostrarForm(false)
       cargarProductos(token!)
+    } else {
+      const err = await res.json().catch(() => ({}))
+      alert('Error al guardar: ' + (err.error || res.status))
     }
     setCargando(false)
+
   }
 
   async function eliminar(id: number) {
